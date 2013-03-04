@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfGui", "WpfGui\WpfGui.csproj", "{98005FCD-C510-4957-88CC-6AF309516815}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mesh", "Mesh\Mesh.csproj", "{9FD28AD6-B66D-4561-AB59-DA0B86C20234}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{98005FCD-C510-4957-88CC-6AF309516815}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98005FCD-C510-4957-88CC-6AF309516815}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98005FCD-C510-4957-88CC-6AF309516815}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98005FCD-C510-4957-88CC-6AF309516815}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FD28AD6-B66D-4561-AB59-DA0B86C20234}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FD28AD6-B66D-4561-AB59-DA0B86C20234}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FD28AD6-B66D-4561-AB59-DA0B86C20234}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FD28AD6-B66D-4561-AB59-DA0B86C20234}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
