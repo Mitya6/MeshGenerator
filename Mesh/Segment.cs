@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace Mesh
 {
-    class Segment
+
+    // lehet ez az osztály nem kell majd
+    public class Segment
     {
+        public Point Start { get; set; }
+        public Point End { get; set; }
     }
 }

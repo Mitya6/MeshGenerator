@@ -24,8 +24,32 @@ namespace WpfGui
         public MainWindow()
         {
             InitializeComponent();
-            Mesh2D testMesh = new Mesh2D();
-            testMesh.SaveVTK();
+
+            // Read Input XML and build geometry
+            Mesh.Geometry geo1= new Mesh.Geometry(@"..\..\..\Input\meshInput.xml");
+            try
+            {
+                geo1.Load();
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Error while reading input file", "Error", 
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            // Create and build mesh based on geometry
+            Mesh2D mesh = new Mesh2D(geo1);
+            try
+            {
+                mesh.BuildMesh();
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Error while building mesh", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            mesh.SaveVTK();
         }
     }
 }

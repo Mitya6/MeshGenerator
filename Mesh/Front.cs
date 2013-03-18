@@ -6,7 +6,14 @@ using System.Threading.Tasks;
 
 namespace Mesh
 {
-    class Front
+    public class Front
     {
+        //public List<Segment> Segments { get; set; }
+        public List<Point> Points { get; set; }
+
+        public Front(List<Point> pts)
+        {
+            this.Points = pts;
+        }
     }
 }

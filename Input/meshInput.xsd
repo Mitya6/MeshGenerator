@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns="http://tempuri.org/meshInput.xsd"
+  targetNamespace="http://tempuri.org/meshInput.xsd"
+  elementFormDefault="qualified">
+
+  <xs:element name="Geometry">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Region" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Contour" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Points">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Point" maxOccurs="unbounded">
+                            <xs:complexType>
+                              <xs:attribute name="x" type="xs:double"/>
+                              <xs:attribute name="y" type="xs:double"/>
+                              <xs:attribute name="z" type="xs:double"/>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="Curves">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="Line" maxOccurs="unbounded">
+                            <xs:complexType>
+                              <xs:attribute name="p1" type="xs:integer"/>
+                              <xs:attribute name="p2" type="xs:integer"/>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="Arc" maxOccurs="unbounded">
+                            
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="type" type="xs:string"/>
+                  <xs:attribute name="elementSize" type="xs:double" use="optional"/>
+                  <xs:attribute name="elementCount" type="xs:integer" use="optional"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

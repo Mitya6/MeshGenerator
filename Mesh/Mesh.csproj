@@ -40,8 +40,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AdvancingFrontMesh.cs" />
+    <Compile Include="Contour.cs" />
+    <Compile Include="Curves\Curve.cs" />
+    <Compile Include="Curves\Line.cs" />
+    <Compile Include="Vector.cs" />
     <Compile Include="DelaunayMesh.cs" />
     <Compile Include="Front.cs" />
+    <Compile Include="Geometry.cs" />
     <Compile Include="Mesh2D.cs" />
     <Compile Include="Point.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
