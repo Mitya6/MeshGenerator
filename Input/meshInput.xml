@@ -1,52 +1,53 @@
 <?xml version="1.0"?>
 <Geometry>
+  <!-- XY plane figure-->
   <Region>
     <Contour type="Outer" elementSize="0.5">
-      <Points>
-        <Point x="-1.0" y="-1.0" z="0.0"/>
-        <Point x="5.0" y="-2.0" z="0.0"/>
-        <Point x="2.5" y="1.5" z="0.0"/>
-        <Point x="2.0" y="5.5" z="0.0"/>
-        <Point x="-1.0" y="3.5" z="0.0"/>
-      </Points>
-      <Curves>
-        <Line p1="0" p2="1"/>
-        <Line p1="1" p2="2"/>
-        <Line p1="2" p2="3"/>
-        <Line p1="3" p2="4"/>
-        <Line p1="4" p2="0"/>
-      </Curves>
+      <Point x="-1.0" y="-1.0" z="0.0"/>
+      <Point x="5.0" y="-2.0" z="0.0"/>
+      <Point x="2.5" y="1.5" z="0.0"/>
+      <Point x="2.0" y="5.5" z="0.0"/>
+      <Point x="-1.0" y="3.5" z="0.0"/>
+      <Point x="-1.2" y="-1.1" z="0.0"/>
+      <Line p1="0" p2="1"/>
+      <Line p1="1" p2="2" elementSize="0.2"/>
+      <Line p1="2" p2="3"/>
+      <Line p1="3" p2="4"/>
+      <Line p1="4" p2="5"/>
+      <Line p1="5" p2="0"/>
     </Contour>
-    <Contour type="Inner" elementCount="8">
-      <Points>
-        <Point x="1.0" y="2.0" z="0.0"/>
-        <Point x="1.5" y="3.0" z="0.0"/>
-        <Point x="1.0" y="4.0" z="0.0"/>
-        <Point x="0.0" y="3.0" z="0.0"/>
-      </Points>
-      <Curves>
-        <Line p1="0" p2="1"/>
-        <Line p1="1" p2="2"/>
-        <Line p1="2" p2="3"/>
-        <Line p1="3" p2="0"/>
-      </Curves>
+    <Contour type="Inner">
+      <Point x="1.0" y="2.0" z="0.0"/>
+      <Point x="0.0" y="3.0" z="0.0"/>
+      <Point x="1.0" y="4.0" z="0.0"/>
+      <Point x="1.5" y="3.0" z="0.0"/>
+      <Line p1="0" p2="1" elementCount="2"/>
+      <Line p1="1" p2="2" elementCount="2"/>
+      <Line p1="2" p2="3" elementCount="3"/>
+      <Line p1="3" p2="0" elementCount="2"/>
     </Contour>
-    <Contour type="Inner" elementCount="6">
-      <Points>
-        <Point x="1.5" y="1.0" z="0.0"/>
-        <Point x="0.5" y="-0.5" z="0.0"/>
-        <Point x="2.5" y="-0.5" z="0.0"/>
-      </Points>
-      <Curves>
-        <Line p1="0" p2="1"/>
-        <Line p1="1" p2="2"/>
-        <Line p1="2" p2="0"/>
-      </Curves>
+    <Contour type="Inner">
+      <Point x="1.5" y="1.0" z="0.0"/>
+      <Point x="2.5" y="-0.5" z="0.0"/>
+      <Point x="0.5" y="-0.5" z="0.0"/>
+      <Line p1="0" p2="1" elementCount="7"/>
+      <Line p1="1" p2="2" elementCount="12"/>
+      <Line p1="2" p2="0" elementCount="6"/>
     </Contour>
   </Region>
+  <!-- 3D plane figure -->
   <Region>
-    <Contour>
-
+    <Contour type="Outer" elementSize="0.1">
+      <Point x="4" y="1" z="0.5"/>
+      <Point x="1" y="-1" z="2"/>
+      <Point x="-2" y="1" z="3"/>
+      <Point x="-2" y="6" z="2.375"/>
+      <Point x="3" y="5" z="0.416666"/>
+      <Line p1="0" p2="1"/>
+      <Line p1="1" p2="2"/>
+      <Line p1="2" p2="3"/>
+      <Line p1="3" p2="4"/>
+      <Line p1="4" p2="0"/>
     </Contour>
   </Region>
 </Geometry>

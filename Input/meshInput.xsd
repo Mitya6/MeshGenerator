@@ -1,57 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-  xmlns="http://tempuri.org/meshInput.xsd"
-  targetNamespace="http://tempuri.org/meshInput.xsd"
   elementFormDefault="qualified">
 
-  <xs:element name="Geometry">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="Region" maxOccurs="unbounded">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element name="Contour" maxOccurs="unbounded">
-                <xs:complexType>
-                  <xs:sequence>
-                    <xs:element name="Points">
-                      <xs:complexType>
-                        <xs:sequence>
-                          <xs:element name="Point" maxOccurs="unbounded">
-                            <xs:complexType>
-                              <xs:attribute name="x" type="xs:double"/>
-                              <xs:attribute name="y" type="xs:double"/>
-                              <xs:attribute name="z" type="xs:double"/>
-                            </xs:complexType>
-                          </xs:element>
-                        </xs:sequence>
-                      </xs:complexType>
-                    </xs:element>
-                    <xs:element name="Curves">
-                      <xs:complexType>
-                        <xs:sequence>
-                          <xs:element name="Line" maxOccurs="unbounded">
-                            <xs:complexType>
-                              <xs:attribute name="p1" type="xs:integer"/>
-                              <xs:attribute name="p2" type="xs:integer"/>
-                            </xs:complexType>
-                          </xs:element>
-                          <xs:element name="Arc" maxOccurs="unbounded">
-                            
-                          </xs:element>
-                        </xs:sequence>
-                      </xs:complexType>
-                    </xs:element>
-                  </xs:sequence>
-                  <xs:attribute name="type" type="xs:string"/>
-                  <xs:attribute name="elementSize" type="xs:double" use="optional"/>
-                  <xs:attribute name="elementCount" type="xs:integer" use="optional"/>
-                </xs:complexType>
-              </xs:element>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
+  <xs:element name="Geometry" type="geometry_type" />
+
+  <xs:complexType name="point_type">
+    <xs:annotation>
+      <xs:documentation>3D pont típus.</xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="x" type="xs:double" />
+    <xs:attribute name="y" type="xs:double" use="optional" default="0.0" />
+    <xs:attribute name="z" type="xs:double" use="optional" default="0.0" />
+  </xs:complexType>
+
+  <xs:complexType name="line_type">
+    <xs:annotation>
+      <xs:documentation>
+        Két 3D pontot összekötő egyenes típus, felosztásához opcionálisan megadható
+        elem méret vagy elem darabszám.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="p1" type="xs:integer"/>
+    <xs:attribute name="p2" type="xs:integer"/>
+    <xs:attribute name="elementSize" type="xs:double" use="optional"/>
+    <xs:attribute name="elementCount" type="xs:double" use="optional"/>
+  </xs:complexType>
+
+  <xs:complexType name="contour_type">
+    <xs:annotation>
+      <xs:documentation>
+        Síkbeli alakzatot kívülről vagy belülről határoló zárt körvonal típus,
+        3D pontokból és az őket összekötő görbékből áll, opcionálisan megadhatja az
+        összes tartalmazott görbe felosztásakor használt elemméretet.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Point" type="point_type" maxOccurs="unbounded" />
+      <xs:element name="Line" type="line_type" maxOccurs="unbounded" />
+    </xs:sequence>
+    <xs:attribute name="type" type="xs:string"/>
+    <xs:attribute name="elementSize" type="xs:double" use="optional"/>
+  </xs:complexType>
+
+  <xs:complexType name="region_type">
+    <xs:annotation>
+      <xs:documentation>
+        Régió típus, legalább egy Contour-t tartalmaz.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Contour" type="contour_type" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="geometry_type">
+    <xs:annotation>
+      <xs:documentation>
+        Geometria típus, az input XML dokumentum gyökérleleme, 
+        legalább egy Region-t kell tartalmazzon.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Region" type="region_type" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
 
 </xs:schema>

@@ -5,35 +5,33 @@ using System.Text;
 using System.Threading.Tasks;
 using Mesh.Curves;
 
-namespace Mesh
+namespace Mesh.Curves
 {
-    public abstract class Curve
+    /// <summary>
+    /// Abstract class for line, circle-arc and other contour types.
+    /// </summary>
+    public abstract class Curve : LineBase
     {
-        protected double length;
+        protected DivisionMethod divisionMethod;
+        protected int elementCount;
+        protected double elementSize;
 
-        private Point start;
-        public Point Start
+        public Curve(Point s, Point e, int elementCount)
+            : base(s, e)
         {
-            get { return start; }
+            this.divisionMethod = DivisionMethod.ElementCount;
+            this.elementCount = elementCount;
+            this.elementSize = -1.0;
         }
 
-        private Point end;
-        public Point End
+        public Curve(Point s, Point e, double elementSize)
+            : base(s, e)
         {
-            get { return end; }
+            this.divisionMethod = DivisionMethod.ElementSize;
+            this.elementCount = -1;
+            this.elementSize = elementSize;
         }
 
-        public Curve(Point s, Point e)
-        {
-            this.start = s;
-            this.end = e;
-            length = -1;
-        }
-
-        public abstract double GetLength();
-        public abstract Point GetPoint(double t);
-        public abstract Vector Normal();
-        public abstract List<Point> Divide(double elementSize);
-        public abstract List<Point> Divide(int elementCount);
+        public abstract List<Point> Divide();
     }
 }

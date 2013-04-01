@@ -26,22 +26,30 @@ namespace WpfGui
             InitializeComponent();
 
             // Read Input XML and build geometry
-            Mesh.Geometry geo1= new Mesh.Geometry(@"..\..\..\Input\meshInput.xml");
+            Mesh.Geometry geo1 = new Mesh.Geometry(@"..\..\..\Input\meshInput.xml");
             try
             {
                 geo1.Load();
             }
+            catch (ApplicationException appEx)
+            {
+                MessageBox.Show(appEx.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);   
+            }
             catch (Exception)
             {
-                MessageBox.Show("Error while reading input file", "Error", 
+                MessageBox.Show("Error while reading input file", "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
             // Create and build mesh based on geometry
-            Mesh2D mesh = new Mesh2D(geo1);
+            Mesh2D mesh = new AdvancingFrontMesh(geo1);
             try
             {
                 mesh.BuildMesh();
+            }
+            catch (ApplicationException appEx)
+            {
+                MessageBox.Show(appEx.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             catch (Exception)
             {

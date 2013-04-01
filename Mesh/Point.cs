@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Mesh
 {
+    /// <summary>
+    /// 3D point class.
+    /// </summary>
     public class Point
     {
         public double X { get; set; }

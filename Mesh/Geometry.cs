@@ -9,8 +9,12 @@ using Mesh.Curves;
 
 namespace Mesh
 {
+    /// <summary>
+    /// Top level container for all geometric data.
+    /// </summary>
     public class Geometry
     {
+        public const double Epsilon = 0.00001;
         public List<Region> Regions { get; set; }
         private String Filename { get; set; }
 
@@ -30,6 +34,9 @@ namespace Mesh
             parseXMLDocument(doc);
         }
 
+        /// <summary>
+        /// Builds geometry from an XmlDocument object.
+        /// </summary>
         private void parseXMLDocument(XmlDocument doc)
         {
             // Process data for each region
@@ -44,23 +51,24 @@ namespace Mesh
                 {
                     Contour cont = null;
 
+                    // Get contour type
+                    ContourTypes type = getContourType((XmlElement)contour);
+
                     // Get division method and value for current contour
                     DivisionMethod method = getDivisionMethod((XmlElement)contour);
-                    if (method == DivisionMethod.elementSize)
+                    if (method == DivisionMethod.ElementSize)
                     {
                         double elementSize = Double.Parse(((XmlElement)contour).
                             Attributes["elementSize"].Value, CultureInfo.InvariantCulture);
-                        cont = new Contour(elementSize);
+                        cont = new Contour(elementSize, type);
                     }
-                    else if (method == DivisionMethod.elementCount)
+                    else
                     {
-                        int elementCount = Int32.Parse(
-                            ((XmlElement)contour).Attributes["elementCount"].Value);
-                        cont = new Contour(elementCount);
+                        cont = new Contour(type);
                     }
 
                     // Read and create points in current contour
-                    XmlNodeList points = ((XmlNode)contour).SelectNodes("Points/Point");
+                    XmlNodeList points = ((XmlNode)contour).SelectNodes("Point");
                     List<Point> pts = new List<Point>();
                     foreach (var point in points)
                     {
@@ -77,17 +85,42 @@ namespace Mesh
                     }
 
                     // Read and create lines
-                    XmlNodeList lines = ((XmlNode)contour).SelectNodes("Curves/Line");
+                    XmlNodeList lines = ((XmlNode)contour).SelectNodes("Line");
                     foreach (var line in lines)
                     {
+                        StraightLine l = null;
+
+                        // Division method for current curve, overrides contour level
+                        // default division method
+                        DivisionMethod divisionMethod = getDivisionMethod((XmlElement)line);
+
                         // Parse line endpoints
                         String s = ((XmlNode)line).Attributes["p1"].Value;
                         int idx1 = int.Parse(s, CultureInfo.InvariantCulture);
                         s = ((XmlNode)line).Attributes["p2"].Value;
                         int idx2 = int.Parse(s, CultureInfo.InvariantCulture);
 
-                        Line l = new Line(pts[idx1], pts[idx2]);
-                        if (cont != null)
+                        if (divisionMethod == DivisionMethod.ElementCount)
+                        {
+                            s = ((XmlNode)line).Attributes["elementCount"].Value;
+                            l = new StraightLine(pts[idx1], pts[idx2], int.Parse(s, CultureInfo.InvariantCulture));
+                        }
+                        else if (divisionMethod == DivisionMethod.ElementSize)
+                        {
+                            s = ((XmlNode)line).Attributes["elementSize"].Value;
+                            l = new StraightLine(pts[idx1], pts[idx2], Double.Parse(s, CultureInfo.InvariantCulture));
+                        }
+                        // Get default element size for the whole contour
+                        else
+                        {
+                            if (cont.DivisionMethod != DivisionMethod.ElementSize)
+                            {
+                                throw new ApplicationException("Invalid input XML");
+                            }
+                            l = new StraightLine(pts[idx1], pts[idx2], cont.ElementSize);
+                        }
+
+                        if (cont != null && l != null)
                         {
                             cont.Curves.Add(l); 
                         }
@@ -105,20 +138,44 @@ namespace Mesh
             }
         }
 
-        private DivisionMethod getDivisionMethod(XmlElement contour)
+        /// <summary>
+        /// Returns the type of the contour (inner or outer).
+        /// </summary>
+        private ContourTypes getContourType(XmlElement contour)
         {
-            DivisionMethod method = DivisionMethod.indeterminate;
-            if (contour.HasAttribute("elementSize"))
+            ContourTypes type = ContourTypes.Invalid;
+            String s = contour.Attributes["type"].Value;
+            if (s == "Outer" || s == "outer")
             {
-                method = DivisionMethod.elementSize;
+                type = ContourTypes.Outer;
             }
-            else if (contour.HasAttribute("elementCount"))
+            if (s == "Inner" || s == "inner")
             {
-                method = DivisionMethod.elementCount;
+                type = ContourTypes.Inner;
+            }
+            return type;
+        }
+
+        /// <summary>
+        /// Returns the division method for a contour or curve xml element.
+        /// </summary>
+        private DivisionMethod getDivisionMethod(XmlElement xmlElement)
+        {
+            DivisionMethod method = DivisionMethod.Indeterminate;
+            if (xmlElement.HasAttribute("elementSize"))
+            {
+                method = DivisionMethod.ElementSize;
+            }
+            else if (xmlElement.HasAttribute("elementCount"))
+            {
+                method = DivisionMethod.ElementCount;
             }
             return method;
         }
 
+        /// <summary>
+        /// Saves data for each region in VTK files.
+        /// </summary>
         public void SaveVTK()
         {
             foreach (Region region in this.Regions)

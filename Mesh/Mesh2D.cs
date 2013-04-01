@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Mesh
 {
-    public class Mesh2D
+    public abstract class Mesh2D
     {
-        private Geometry geometry { get; set; }
+        protected Geometry geometry { get; set; }
 
         public Mesh2D(Geometry geometry)
         {
@@ -16,40 +16,13 @@ namespace Mesh
         }
 
         /// <summary>
-        /// Creates the mesh from the Geometry object.
+        /// Creates triangle meshes from the Geometry object.
         /// </summary>
-        public void BuildMesh()
-        {
-            // Check whether the contours of the geometry are closed.
-
-            // Check whether the points of the contours are in the same plane.
-
-            // Divide contours into segments.
-            DivideContours();
-
-            // TEST: form triangles
-            FormTriangles();
-        }
-
-        private void FormTriangles()
-        {
-            foreach (Region region in this.geometry.Regions)
-            {
-                region.FormTriangles();
-            }
-        }
+        public abstract void BuildMesh();
 
         public void SaveVTK()
         {
             this.geometry.SaveVTK();
-        }
-
-        public void DivideContours()
-        {
-            foreach (Region region in this.geometry.Regions)
-            {
-                region.DivideContours();
-            }
         }
     }
 }

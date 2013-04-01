@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Mesh.Curves
+namespace Mesh
 {
     public class Vector
     {
@@ -48,6 +48,12 @@ namespace Mesh.Curves
         public double GetLength()
         {
             return Math.Sqrt(this.X * this.X + this.Y * this.Y + this.Z * this.Z);
+        }
+
+        public static Vector CrossProduct(Vector v1, Vector v2)
+        {
+            return new Vector(v1.Y * v2.Z - v2.Y * v1.Z, v1.Z * v2.X - v1.X * v2.Z,
+                v1.X * v2.Y - v1.Y * v2.X);
         }
     }
 }

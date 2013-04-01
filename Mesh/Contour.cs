@@ -3,55 +3,46 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Mesh.Curves;
 
 namespace Mesh
 {
+    /// <summary>
+    /// Represents an inner or outer border of a plane figure.
+    /// </summary>
     public class Contour
     {
         public List<Curve> Curves { get; set; }
-        private DivisionMethod divisionMethod;
-        private double elementSize = -1.0;
-        private int elementCount = -1;
+        public DivisionMethod DivisionMethod { get; set; }
+        public double ElementSize { get; set; }
+        public ContourTypes ContourType { get; set; }
 
-        public Contour(double size)
+        public Contour(ContourTypes type)
         {
             this.Curves = new List<Curve>();
-            this.divisionMethod = DivisionMethod.elementSize;
-            this.elementSize = size;
+            this.DivisionMethod = DivisionMethod.Indeterminate;
+            this.ContourType = type;
         }
 
-        public Contour(int count)
+        public Contour(double size, ContourTypes type)
         {
             this.Curves = new List<Curve>();
-            this.divisionMethod = DivisionMethod.elementCount;
-            this.elementCount = count;
+            this.DivisionMethod = DivisionMethod.ElementSize;
+            this.ElementSize = size;
+            this.ContourType = type;
         }
 
         /// <summary>
-        /// Divides the contour into discrete points based on the given
-        /// element size or element count.
+        /// Divides the contour into discrete points.
         /// </summary>
         public List<Point> Divide()
         {
             List<Point> contourPoints = new List<Point>();
 
-            // Number of elements for each curve
-            List<int> curveElementNumbers = getCurveElementNumbers();
-
             // Divide each curve in this contour.
             foreach (Curve curve in this.Curves)
             {
-                List<Point> curvePoints = null;
-
-                if (divisionMethod == DivisionMethod.elementSize)
-                {
-                    curvePoints = curve.Divide(elementSize);
-                }
-                else if (divisionMethod == DivisionMethod.elementCount)
-                {
-                    curvePoints = curve.Divide(curveElementNumbers[0]);
-                    curveElementNumbers.RemoveAt(0);
-                }
+                List<Point> curvePoints = curve.Divide();
 
                 // Remove last point of the curve, it is the same as the 
                 // first point of the next curve
@@ -77,36 +68,24 @@ namespace Mesh
             return length;
         }
 
-        /// <summary>
-        /// Returns a list that contains the number of elements for each curve
-        /// allocated from the total elements of the contour.
-        /// </summary>
-        /// <returns></returns>
-        private List<int> getCurveElementNumbers()
+        public List<Point> GetContourPoints()
         {
-            List<int> numbers = new List<int>();
-            double contourLength = this.GetLength();
-            int remainingCount = this.elementCount;
-
-            // Distribute contour elements among the curves proportionally.
-            for (int i = 0; i < this.Curves.Count; i++)
+            List<Point> pts = new List<Point>();
+            foreach (Curve curve in this.Curves)
             {
-                if (i == this.Curves.Count - 1)
-                {
-                    numbers.Add(remainingCount);
-                    break;
-                }
-                double proportion = (Curves[i].GetLength() / contourLength);
-                int number = (int)(proportion * this.elementCount);
-                numbers.Add(number);
-                remainingCount -= number;
+                pts.Add(curve.Start);
             }
-            return numbers;
+            return pts;
         }
     }
 
     public enum DivisionMethod
     {
-        elementSize, elementCount, indeterminate
+        ElementSize, ElementCount, Indeterminate
+    }
+
+    public enum ContourTypes
+    {
+        Outer, Inner, Invalid
     }
 }

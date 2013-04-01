@@ -42,7 +42,10 @@
     <Compile Include="AdvancingFrontMesh.cs" />
     <Compile Include="Contour.cs" />
     <Compile Include="Curves\Curve.cs" />
-    <Compile Include="Curves\Line.cs" />
+    <Compile Include="Curves\StraightLine.cs" />
+    <Compile Include="LineBase.cs" />
+    <Compile Include="Plane.cs" />
+    <Compile Include="Transformation.cs" />
     <Compile Include="Vector.cs" />
     <Compile Include="DelaunayMesh.cs" />
     <Compile Include="Front.cs" />
