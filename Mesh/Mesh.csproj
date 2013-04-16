@@ -30,6 +30,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -43,10 +44,11 @@
     <Compile Include="Contour.cs" />
     <Compile Include="Curves\Curve.cs" />
     <Compile Include="Curves\StraightLine.cs" />
+    <Compile Include="Enum\DivisionMethod.cs" />
+    <Compile Include="Enum\ContourTypes.cs" />
     <Compile Include="LineBase.cs" />
     <Compile Include="Plane.cs" />
     <Compile Include="Transformation.cs" />
-    <Compile Include="Vector.cs" />
     <Compile Include="DelaunayMesh.cs" />
     <Compile Include="Front.cs" />
     <Compile Include="Geometry.cs" />

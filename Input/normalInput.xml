@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<Geometry>
+  <!-- XY plane figure-->
+  <Region>
+    <Contour type="Outer" elementSize="0.5">
+      <Point x="-1.0" y="-1.0" z="0.0"/>
+      <Point x="5.0" y="-2.0" z="0.0"/>
+      <Point x="2.5" y="1.5" z="0.0"/>
+      <Point x="2.0" y="5.5" z="0.0"/>
+      <Point x="-1.0" y="3.5" z="0.0"/>
+      <Line p1="0" p2="1"/>
+      <Line p1="1" p2="2"/>
+      <Line p1="2" p2="3"/>
+      <Line p1="3" p2="4"/>
+      <Line p1="4" p2="0"/>
+    </Contour>
+  </Region>
+</Geometry>

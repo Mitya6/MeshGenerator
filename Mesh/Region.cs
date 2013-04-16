@@ -8,47 +8,37 @@ namespace Mesh
 {
     public class Region
     {
-        public List<Point> Points { get; set; }
-        public List<Triangle> Triangles { get; set; }
         public List<Contour> Contours { get; set; }
-        public List<Front> Fronts { get; set; }
+        public Mesh2D Mesh { get; set; }
 
         public Region()
         {
-            this.Points = new List<Point>();
-            this.Triangles = new List<Triangle>();
             this.Contours = new List<Contour>();
-            this.Fronts = new List<Front>();
         }
 
-        public void DivideContours()
+        /// <summary>
+        /// Divides the contours in this reigon into fronts.
+        /// </summary>
+        public List<Front> DivideContours()
         {
+            List<Front> fronts = new List<Front>();
             foreach (Contour contour in this.Contours)
             {
                 Front f = new Front(contour.Divide());
-                this.Fronts.Add(f);
-                this.Points.AddRange(f.Points);
+                fronts.Add(f);
             }
+            return fronts;
         }
 
-        // TO BE continued
-        public void FormTriangles()
+        public void BuildAdvancingFrontMesh()
         {
-            foreach (Front front in this.Fronts)
-            {
-                foreach (Segment segment in front.Segments)
-                {
-                    Point rotatedPoint = segment.RotateInward60();
-                    this.Points.Add(rotatedPoint);
-                    this.Triangles.Add(new Triangle(segment.Start, segment.End, rotatedPoint));
-                }
-            }
+            this.Mesh = new AdvancingFrontMesh(this);
+            this.Mesh.BuildMesh();
         }
 
         public void SaveVTK()
         {
-            VTKWriter writer = new VTKWriter(Guid.NewGuid().ToString());
-            writer.Write(Points, Triangles);
+            this.Mesh.SaveVTK();
         }
     }
 }

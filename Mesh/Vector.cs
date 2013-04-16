@@ -5,6 +5,7 @@ using System.Text;
 
 namespace Mesh
 {
+    // Unused, Vector3D structure instead (PresentationCore.dll)
     public class Vector
     {
         public double X { get; set; }

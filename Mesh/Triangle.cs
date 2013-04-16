@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Media3D;
 
 namespace Mesh
 {
@@ -17,5 +18,13 @@ namespace Mesh
             Points[1] = b;
             Points[2] = c;
         }
+
+        //public bool AreCollinear(Point p1, Point p2, Point p3)
+        //{
+        //    Vector3D v1 = p2.ToVector3D() - p1.ToVector3D();
+        //    Vector3D v2 = p3.ToVector3D() - p1.ToVector3D();
+        //    if (Math.Abs(Vector3D.CrossProduct(v1, v2).Length) < Geometry.Epsilon) return true;
+        //    return false;
+        //}
     }
 }

@@ -6,11 +6,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Mesh.Curves;
+using Mesh.Enum;
 
 namespace Mesh
 {
     /// <summary>
-    /// Top level container for all geometric data.
+    /// Main object and top level container for all geometric data.
     /// </summary>
     public class Geometry
     {
@@ -31,13 +32,21 @@ namespace Mesh
             doc.Load(Filename);
 
             // Parse XML document content.
-            parseXMLDocument(doc);
+            ParseXMLDocument(doc);
+        }
+
+        public void BuildMeshes()
+        {
+            foreach (Region region in this.Regions)
+            {
+                region.BuildAdvancingFrontMesh();
+            }
         }
 
         /// <summary>
         /// Builds geometry from an XmlDocument object.
         /// </summary>
-        private void parseXMLDocument(XmlDocument doc)
+        private void ParseXMLDocument(XmlDocument doc)
         {
             // Process data for each region
             XmlNodeList regions = doc.SelectNodes("//Region");
@@ -52,10 +61,10 @@ namespace Mesh
                     Contour cont = null;
 
                     // Get contour type
-                    ContourTypes type = getContourType((XmlElement)contour);
+                    ContourTypes type = GetContourType((XmlElement)contour);
 
                     // Get division method and value for current contour
-                    DivisionMethod method = getDivisionMethod((XmlElement)contour);
+                    DivisionMethod method = GetDivisionMethod((XmlElement)contour);
                     if (method == DivisionMethod.ElementSize)
                     {
                         double elementSize = Double.Parse(((XmlElement)contour).
@@ -92,7 +101,7 @@ namespace Mesh
 
                         // Division method for current curve, overrides contour level
                         // default division method
-                        DivisionMethod divisionMethod = getDivisionMethod((XmlElement)line);
+                        DivisionMethod divisionMethod = GetDivisionMethod((XmlElement)line);
 
                         // Parse line endpoints
                         String s = ((XmlNode)line).Attributes["p1"].Value;
@@ -141,7 +150,7 @@ namespace Mesh
         /// <summary>
         /// Returns the type of the contour (inner or outer).
         /// </summary>
-        private ContourTypes getContourType(XmlElement contour)
+        private ContourTypes GetContourType(XmlElement contour)
         {
             ContourTypes type = ContourTypes.Invalid;
             String s = contour.Attributes["type"].Value;
@@ -159,7 +168,7 @@ namespace Mesh
         /// <summary>
         /// Returns the division method for a contour or curve xml element.
         /// </summary>
-        private DivisionMethod getDivisionMethod(XmlElement xmlElement)
+        private DivisionMethod GetDivisionMethod(XmlElement xmlElement)
         {
             DivisionMethod method = DivisionMethod.Indeterminate;
             if (xmlElement.HasAttribute("elementSize"))

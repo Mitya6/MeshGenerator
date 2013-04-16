@@ -8,11 +8,17 @@ namespace Mesh
 {
     public abstract class Mesh2D
     {
-        protected Geometry geometry { get; set; }
+        public List<Point> Points { get; set; }
+        public List<Triangle> Triangles { get; set; }
+        public List<Front> Fronts { get; set; }
+        public Region OwnerRegion { get; set; }
 
-        public Mesh2D(Geometry geometry)
+        public Mesh2D(Region region)
         {
-            this.geometry = geometry;
+            this.Points = new List<Point>();
+            this.Triangles = new List<Triangle>();
+            this.Fronts = new List<Front>();
+            this.OwnerRegion = region;
         }
 
         /// <summary>
@@ -22,7 +28,8 @@ namespace Mesh
 
         public void SaveVTK()
         {
-            this.geometry.SaveVTK();
+            VTKWriter writer = new VTKWriter(Guid.NewGuid().ToString());
+            writer.Write(Points, Triangles);
         }
     }
 }

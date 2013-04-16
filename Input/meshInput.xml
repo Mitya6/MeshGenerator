@@ -36,7 +36,7 @@
     </Contour>
   </Region>
   <!-- 3D plane figure -->
-  <Region>
+  <!--<Region>
     <Contour type="Outer" elementSize="0.1">
       <Point x="4" y="1" z="0.5"/>
       <Point x="1" y="-1" z="2"/>
@@ -49,5 +49,5 @@
       <Line p1="3" p2="4"/>
       <Line p1="4" p2="0"/>
     </Contour>
-  </Region>
+  </Region>-->
 </Geometry>

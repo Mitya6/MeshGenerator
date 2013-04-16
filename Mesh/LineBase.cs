@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Media3D;
 
 namespace Mesh
 {
@@ -34,6 +35,6 @@ namespace Mesh
 
         public abstract double GetLength();
         public abstract Point GetPoint(double t);
-        public abstract Vector Normal();
+        public abstract Vector3D Normal();
     }
 }

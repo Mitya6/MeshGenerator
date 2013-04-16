@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Media3D;
 
 namespace Mesh
 {
@@ -12,12 +13,12 @@ namespace Mesh
         public double B { get; set; }
         public double C { get; set; }
         public double D { get; set; }
-        public Vector Normal { get; set; }
+        public Vector3D Normal { get; set; }
 
         public Plane(Point p1, Point p2, Point p3)
         {
-            Vector v1 = new Vector(p1), v2 = new Vector(p2), v3 = new Vector(p3);
-            this.Normal = Vector.CrossProduct(v2 - v1, v3 - v1);
+            Vector3D v1 = p1.ToVector3D(), v2 = p2.ToVector3D(), v3 = p3.ToVector3D();
+            this.Normal = Vector3D.CrossProduct(v2 - v1, v3 - v1);
             this.A = Normal.X;
             this.B = Normal.Y;
             this.C = Normal.Z;

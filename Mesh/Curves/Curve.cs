@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Mesh.Curves;
+using Mesh.Enum;
 
 namespace Mesh.Curves
 {

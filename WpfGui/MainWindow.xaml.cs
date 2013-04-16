@@ -26,7 +26,7 @@ namespace WpfGui
             InitializeComponent();
 
             // Read Input XML and build geometry
-            Mesh.Geometry geo1 = new Mesh.Geometry(@"..\..\..\Input\meshInput.xml");
+            Mesh.Geometry geo1 = new Mesh.Geometry(@"..\..\..\Input\rectangleInput.xml");
             try
             {
                 geo1.Load();
@@ -41,11 +41,10 @@ namespace WpfGui
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
-            // Create and build mesh based on geometry
-            Mesh2D mesh = new AdvancingFrontMesh(geo1);
+            // Build meshes based on geometry
             try
             {
-                mesh.BuildMesh();
+                geo1.BuildMeshes();
             }
             catch (ApplicationException appEx)
             {
@@ -57,7 +56,7 @@ namespace WpfGui
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
-            mesh.SaveVTK();
+            geo1.SaveVTK();
         }
     }
 }

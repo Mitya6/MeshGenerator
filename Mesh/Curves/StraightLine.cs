@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Media3D;
+using Mesh.Enum;
 
 namespace Mesh.Curves
 {
@@ -33,7 +35,7 @@ namespace Mesh.Curves
                 return this.length;
 
             // If length is being calculated for the first time.
-            return (new Vector(this.End) - new Vector(this.Start)).GetLength();
+            return (this.End.ToVector3D() - this.Start.ToVector3D()).Length;
         }
 
         /// <summary>
@@ -45,14 +47,14 @@ namespace Mesh.Curves
             if (t < 0 || t > 1) return null;
 
             // Convert points to vectors for easier calculation
-            Vector vStart = new Vector(this.Start);
-            Vector vEnd = new Vector(this.End);
-            Vector vDiff = vEnd - vStart;
+            Vector3D vStart = this.Start.ToVector3D();
+            Vector3D vEnd = this.End.ToVector3D();
 
-            return (vStart + t * vDiff).ToPoint();
+            Vector3D result = vStart + t * (vEnd - vStart);
+            return new Point(result.X, result.Y, result.Z);
         }
 
-        public override Vector Normal()
+        public override Vector3D Normal()
         {
             throw new NotImplementedException();
         }

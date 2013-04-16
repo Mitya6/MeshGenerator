@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Mesh.Curves;
+using Mesh.Enum;
 
 namespace Mesh
 {
@@ -77,15 +78,5 @@ namespace Mesh
             }
             return pts;
         }
-    }
-
-    public enum DivisionMethod
-    {
-        ElementSize, ElementCount, Indeterminate
-    }
-
-    public enum ContourTypes
-    {
-        Outer, Inner, Invalid
-    }
+    }       
 }
