@@ -50,7 +50,7 @@ namespace Mesh
         public Point GetIdealPoint(double h)
         {
             Vector3D half = (this.Start.ToVector3D() + this.End.ToVector3D()) / 2;
-            Vector3D idealLocation = half + h * Normal();
+            Vector3D idealLocation = half + h * this.Normal();
             return new Point(idealLocation.X, idealLocation.Y, idealLocation.Z);
         }
 
@@ -127,7 +127,7 @@ namespace Mesh
             Vector3D qmpxr = Vector3D.CrossProduct(qmp, r);
             Vector3D qmpxs = Vector3D.CrossProduct(qmp, s);
 
-            if (qmpxr.Length == 0.0)
+            if (qmpxr.Length == 0.0 && qmp.Length > Geometry.Epsilon)
             {
                 // Collinear
                 //p p+r q q+s

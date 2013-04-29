@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -21,19 +25,59 @@ namespace WpfGui
     /// </summary>
     public partial class MainWindow : Window
     {
+        private String directoryPath = @"..\..\..\Input\";
+        private BackgroundWorker bw;
+
         public MainWindow()
         {
             InitializeComponent();
 
+            this.bw = new BackgroundWorker();
+            this.bw.DoWork += (s, eargs) => BuildMeshes(eargs.Argument.ToString());
+            this.bw.RunWorkerCompleted += (s, eargs) => OnBuildFinish();
+
+            List<string> fileNames = ReadInputFileNames();
+            foreach (String fileName in fileNames)
+            {
+                this.lbInputFiles.Items.Add(fileName);
+            }
+        }
+
+        private List<string> ReadInputFileNames()
+        {
+            DirectoryInfo di = new DirectoryInfo(directoryPath);
+            var fileInfoArray = di.EnumerateFiles("*.xml");
+            List<string> fileNames = new List<string>();
+            foreach (var fileInfo in fileInfoArray)
+            {
+                fileNames.Add(fileInfo.Name);
+            }
+            return fileNames;
+        }
+
+        private void OnBuildFinish()
+        {
+            this.btnStart.IsEnabled = true;
+            this.lblWorking.Visibility = System.Windows.Visibility.Hidden;
+        }
+
+        private void OnBuildStart()
+        {
+            this.btnStart.IsEnabled = false;
+            this.lblWorking.Visibility = System.Windows.Visibility.Visible;
+        }
+
+        private void BuildMeshes(String fileName)
+        {
             // Read Input XML and build geometry
-            Mesh.Geometry geo1 = new Mesh.Geometry(@"..\..\..\Input\rectangleInput.xml");
+            Mesh.Geometry geo1 = new Mesh.Geometry(directoryPath + fileName);
             try
             {
                 geo1.Load();
             }
             catch (ApplicationException appEx)
             {
-                MessageBox.Show(appEx.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);   
+                MessageBox.Show(appEx.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             catch (Exception)
             {
@@ -57,6 +101,14 @@ namespace WpfGui
             }
 
             geo1.SaveVTK();
+        }
+
+        private void btnStart_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.lbInputFiles.SelectedItem == null) return;
+
+            OnBuildStart();
+            this.bw.RunWorkerAsync(this.lbInputFiles.SelectedValue);
         }
     }
 }

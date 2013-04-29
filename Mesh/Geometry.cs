@@ -39,7 +39,7 @@ namespace Mesh
         {
             foreach (Region region in this.Regions)
             {
-                region.BuildAdvancingFrontMesh();
+                region.BuildMesh(MeshTypes.AdvancingFront);
             }
         }
 

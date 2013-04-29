@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Mesh.Enum;
 
 namespace Mesh
 {
@@ -30,9 +31,16 @@ namespace Mesh
             return fronts;
         }
 
-        public void BuildAdvancingFrontMesh()
+        public void BuildMesh(MeshTypes meshType)
         {
-            this.Mesh = new AdvancingFrontMesh(this);
+            if (meshType == MeshTypes.AdvancingFront)
+            {
+                this.Mesh = new AdvancingFrontMesh(this);
+            }
+            else if (meshType == MeshTypes.Delaunay)
+            {
+                // TODO: delaunay mesh
+            }
             this.Mesh.BuildMesh();
         }
 

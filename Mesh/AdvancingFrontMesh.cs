@@ -14,7 +14,7 @@ namespace Mesh
         public AdvancingFrontMesh(Region region)
             : base(region)
         {
-            this.radiusMultiplier = 0.8;
+            this.radiusMultiplier = 0.7;
             this.idealDistance = Double.MaxValue;
         }
 
@@ -89,10 +89,28 @@ namespace Mesh
                 while (front.Segments.Count > 0)
                 {
                     Segment shortestSegment = front.GetShortestUncheckedSegment();
+
+                    //debug
+                    // ha semelyik segmensre sem lehet 3szöget illeszteni, akkor:
+                    // 1) 3 hosszú kör keresés és 3szög formálás
+                    // 2) 4 hosszú kör keresés
+                    //      2a) nagy szögek -> közelebbi pontpár összeköt
+                    //      2b) kis szögek -> pontösszevonás
+                    if (shortestSegment == null)
+                    {
+                        int dd = 1;
+                        return;
+                    }
+
+                    //if (Triangles.Count == 537)
+                    //{
+                    //    int dsd = 1;
+                    //}
+                    //debug
+
                     shortestSegment.Checked = true;
 
                     // Find ideal point.
-                    //Point idealPoint = shortestSegment.RotateInward(60.0);
                     Point idealPoint = shortestSegment.GetIdealPoint(idealDistance);
 
                     // Search for nearby points.
@@ -103,14 +121,8 @@ namespace Mesh
 
                     while (nearbyPoints.Count > 0)
                     {
-                        // Processing ideal point
-                        //if (nearbyPoints.Count == 1)
-                        //{
-                        //    if (!front.IsPointInside(nearbyPoints[0]))
-                        //        return;
-                        //}
-                        bool formed = FormTriangle(front, shortestSegment, nearbyPoints[0],
-                            nearbyPoints.Count != 1);
+                        bool formed = 
+                            TryFormTriangle(front, shortestSegment, nearbyPoints[0], nearbyPoints.Count != 1);
                         if (formed)
                         {
                             foreach (Segment seg in front.GetSegmentsUnordered())
@@ -122,59 +134,34 @@ namespace Mesh
 
                         nearbyPoints.RemoveAt(0);
                     }
-
-
-                    //// No nearby point.
-                    //if (nearbyPoints.Count == 0)
-                    //{
-                    //    if (!front.IsPointInside(idealPoint))
-                    //        break;
-                    //    FormTriangle(front, shortestSegment, idealPoint, false);
-                    //    continue;
-                    //}
-
-                    //// One nearby point.
-                    //if (nearbyPoints.Count == 1)
-                    //{
-                    //    Point p = nearbyPoints[0];
-                    //    FormTriangle(front, shortestSegment, p, true);
-                    //    continue;
-                    //}
-
-                    //// Multiple nearby points.
-                    //if (nearbyPoints.Count > 1)
-                    //{
-                    //    Point p = GetClosestPoint(idealPoint, nearbyPoints);
-                    //    FormTriangle(front, shortestSegment, p, true);
-                    //}
                 }
             }
         }
 
-        private bool FormTriangle(Front front, Segment shortestSegment, Point p, bool existingPoint)
+        private bool TryFormTriangle(Front front, Segment shortestSegment, Point p, bool existingPoint)
         {
-            Segment s1 = new Segment(shortestSegment.Start, p);
-            Segment s2 = new Segment(p, shortestSegment.End);
+            Segment newSegment1 = new Segment(shortestSegment.Start, p);
+            Segment newSegment2 = new Segment(p, shortestSegment.End);
 
             List<Segment> SegmentsToAdd = new List<Segment>();
             List<Segment> SegmentsToRemove = new List<Segment>();
 
             // Check if triangle can be formed
-            if (!front.Contains(s1))
+            if (!front.Contains(newSegment1))
             {
                 // Test if triangle candidate intersects with existing elements
-                if (CheckIntersection(s1) == false) return false;
-                SegmentsToAdd.Add(s1);
+                if (CheckIntersection(newSegment1) == false) return false;
+                SegmentsToAdd.Add(newSegment1);
             }
-            else SegmentsToRemove.Add(s1);
+            else SegmentsToRemove.Add(newSegment1);
 
-            if (!front.Contains(s2))
+            if (!front.Contains(newSegment2))
             {
                 // Test if triangle candidate intersects with existing elements
-                if (CheckIntersection(s2) == false) return false;
-                SegmentsToAdd.Add(s2);
+                if (CheckIntersection(newSegment2) == false) return false;
+                SegmentsToAdd.Add(newSegment2);
             }
-            else SegmentsToRemove.Add(s2);
+            else SegmentsToRemove.Add(newSegment2);
 
             // update front and form triangle
 
@@ -207,7 +194,8 @@ namespace Mesh
                 Point p1 = s.Intersection(new Segment(triangle.Points[0], triangle.Points[1]));
                 Point p2 = s.Intersection(new Segment(triangle.Points[1], triangle.Points[2]));
                 Point p3 = s.Intersection(new Segment(triangle.Points[2], triangle.Points[0]));
-                if (p1 != null || p2 != null || p3 != null) return false;
+                if (p1 != null || p2 != null || p3 != null)
+                    return false;
             }
             return true;
         }

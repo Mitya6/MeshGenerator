@@ -46,6 +46,7 @@
     <Compile Include="Curves\StraightLine.cs" />
     <Compile Include="Enum\DivisionMethod.cs" />
     <Compile Include="Enum\ContourTypes.cs" />
+    <Compile Include="Enum\MeshTypes.cs" />
     <Compile Include="LineBase.cs" />
     <Compile Include="Plane.cs" />
     <Compile Include="Transformation.cs" />
