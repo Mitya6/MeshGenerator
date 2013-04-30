@@ -19,6 +19,8 @@ namespace Mesh
         public List<Region> Regions { get; set; }
         private String Filename { get; set; }
 
+        public event EventHandler TriangleAdded;
+
         public Geometry(String filename)
         {
             this.Regions = new List<Region>();
@@ -52,7 +54,7 @@ namespace Mesh
             XmlNodeList regions = doc.SelectNodes("//Region");
             foreach (var region in regions)
             {
-                Region reg = new Region();
+                Region reg = new Region(this);
 
                 // Select contours in order
                 XmlNodeList contours = ((XmlNode)region).SelectNodes("Contour");
@@ -191,6 +193,11 @@ namespace Mesh
             {
                 region.SaveVTK();
             }
+        }
+
+        internal void RaiseTriangleAdded()
+        {
+            TriangleAdded(this, new EventArgs());
         }
     }
 }

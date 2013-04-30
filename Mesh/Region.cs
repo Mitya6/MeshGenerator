@@ -11,10 +11,12 @@ namespace Mesh
     {
         public List<Contour> Contours { get; set; }
         public Mesh2D Mesh { get; set; }
+        public Geometry Geo { get; set; }
 
-        public Region()
+        public Region(Geometry geo)
         {
             this.Contours = new List<Contour>();
+            this.Geo = geo;
         }
 
         /// <summary>

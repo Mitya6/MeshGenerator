@@ -41,7 +41,6 @@ namespace Mesh
         /// <summary>
         /// Get all segments of this front unordered.
         /// </summary>
-        /// <returns></returns>
         public List<Segment> GetSegmentsUnordered()
         {
             List<Segment> segments = new List<Segment>();
@@ -123,8 +122,9 @@ namespace Mesh
             if (!startRemains) this.Points.Remove(s.Start);
         }
 
-        public void RemoveSegment(Segment s)
+        public bool RemoveSegment(Segment s)
         {
+            bool removed = false;
             double? toRemove = null;
             foreach (var item in this.Segments)
             {
@@ -134,15 +134,16 @@ namespace Mesh
                     if (s.Equals(segment))
                     {
                         sToRemove = segment;
-                        if (item.Value.Count == 0)
-                        {
-                            Segments.Remove(item.Key);
-                        }
+                        //if (item.Value.Count == 0)
+                        //{
+                        //    Segments.Remove(item.Key);
+                        //}
                     }
                 }
                 if (sToRemove != null)
                 {
                     item.Value.RemoveAll(seg => seg.Equals(sToRemove));
+                    removed = true;
                 }
                 if (item.Value.Count == 0)
                 {
@@ -154,6 +155,7 @@ namespace Mesh
                 this.Segments.Remove((double)toRemove);
             }
             RemoveUnconnectedEndpoints(s);
+            return removed;
         }
 
         /// <summary>
@@ -190,8 +192,6 @@ namespace Mesh
         /// <summary>
         /// Checks if the front contains a segment.
         /// </summary>
-        /// <param name="s"></param>
-        /// <returns></returns>
         public bool Contains(Segment s)
         {
             List<Segment> segments = GetSegmentsUnordered();
@@ -225,6 +225,35 @@ namespace Mesh
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Determines whether the front has at least one commmon 
+        /// point with another front.
+        /// </summary>
+        public bool HasCommonPointWith(Front other)
+        {
+            foreach (Point point in this.Points)
+            {
+                foreach (Point otherPoint in other.Points)
+                {
+                    if (point.Equals(otherPoint))
+                        return true;
+                }
+            }
+            return false;
+        }
+
+
+        public void Join(Front front)
+        {
+            this.Points.AddRange(front.Points);
+
+            List<Segment> segments = front.GetSegmentsUnordered();
+            foreach (Segment segment in segments)
+            {
+                this.AddSegment(segment);
+            }
         }
     }
 }

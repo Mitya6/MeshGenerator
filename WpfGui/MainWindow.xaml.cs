@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using Mesh;
 
 namespace WpfGui
@@ -27,6 +28,9 @@ namespace WpfGui
     {
         private String directoryPath = @"..\..\..\Input\";
         private BackgroundWorker bw;
+        private Mesh.Geometry geo;
+        private int triangleCount = 0;
+        private Timer timer;
 
         public MainWindow()
         {
@@ -41,6 +45,19 @@ namespace WpfGui
             {
                 this.lbInputFiles.Items.Add(fileName);
             }
+
+            timer = new Timer { AutoReset = true, Interval = 100 };
+            timer.Elapsed += (s, eargs) =>
+            {
+                Application.Current.Dispatcher.BeginInvoke(
+                    DispatcherPriority.Background, new Action(() =>
+                        this.lblWorking.Content = "Triangles: " + triangleCount));
+            };
+        }
+
+        private void geo_TriangleAdded(object sender, EventArgs e)
+        {
+            triangleCount++;
         }
 
         private List<string> ReadInputFileNames()
@@ -57,12 +74,14 @@ namespace WpfGui
 
         private void OnBuildFinish()
         {
+            this.timer.Stop();
             this.btnStart.IsEnabled = true;
             this.lblWorking.Visibility = System.Windows.Visibility.Hidden;
         }
 
         private void OnBuildStart()
         {
+            this.timer.Start();
             this.btnStart.IsEnabled = false;
             this.lblWorking.Visibility = System.Windows.Visibility.Visible;
         }
@@ -70,10 +89,14 @@ namespace WpfGui
         private void BuildMeshes(String fileName)
         {
             // Read Input XML and build geometry
-            Mesh.Geometry geo1 = new Mesh.Geometry(directoryPath + fileName);
+            this.geo = new Mesh.Geometry(directoryPath + fileName);
+
+            // Subscribe to add and remove triangle events
+            this.geo.TriangleAdded += geo_TriangleAdded;
+
             try
             {
-                geo1.Load();
+                this.geo.Load();
             }
             catch (ApplicationException appEx)
             {
@@ -88,7 +111,7 @@ namespace WpfGui
             // Build meshes based on geometry
             try
             {
-                geo1.BuildMeshes();
+                this.geo.BuildMeshes();
             }
             catch (ApplicationException appEx)
             {
@@ -100,7 +123,7 @@ namespace WpfGui
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
-            geo1.SaveVTK();
+            this.geo.SaveVTK();
         }
 
         private void btnStart_Click(object sender, RoutedEventArgs e)
