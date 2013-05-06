@@ -20,17 +20,29 @@ namespace Mesh
         }
 
         /// <summary>
-        /// Divides the contours in this reigon into fronts.
+        /// Divides the contours in this reigon and creates a front.
         /// </summary>
-        public List<Front> DivideContours()
+        public Front DivideContours(out double idealDistance)
         {
-            List<Front> fronts = new List<Front>();
-            foreach (Contour contour in this.Contours)
+            //double d;
+            Front front = new Front(this.Contours[0].Divide(out idealDistance));
+            //idealDistance = Double.MaxValue;
+
+            for (int i = 1; i < this.Contours.Count; i++)
             {
-                Front f = new Front(contour.Divide());
-                fronts.Add(f);
+                double d;
+                Front f = new Front(Contours[i].Divide(out d));
+                if (d < idealDistance) idealDistance = d;
+                front.Join(f);
             }
-            return fronts;
+
+            // Mark edge points.
+            foreach (Point point in front.InitialPoints)
+            {
+                point.IsEdgePoint = true;
+            }
+
+            return front;
         }
 
         public void BuildMesh(MeshTypes meshType)

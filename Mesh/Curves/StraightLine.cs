@@ -62,32 +62,35 @@ namespace Mesh.Curves
         /// <summary>
         /// Divides the line either by element size or by element count.
         /// </summary>
-        public override List<Point> Divide()
+        public override List<Point> Divide(out double distance)
         {
             if (this.divisionMethod == DivisionMethod.ElementCount)
             {
-                return DivideCount();
+                return DivideCount(out distance);
             }
-            return DivideSize();
+            return DivideSize(out distance);
         }
 
         /// <summary>
         /// Divides the line into segments with approximately the specified segment size.
         /// </summary>
-        private List<Point> DivideSize()
+        private List<Point> DivideSize(out double distance)
         {
             // Calculate how many elements fit on this line
             this.elementCount = (int)Math.Floor(this.GetLength() / this.elementSize) + 1;
-            return DivideCount();
+            return DivideCount(out distance);
         }
 
         /// <summary>
         /// Divides the line into the specified number of elements.
         /// </summary>
-        private List<Point> DivideCount()
+        private List<Point> DivideCount(out double distance)
         {
             if (this.elementCount < 1)
+            {
+                distance = -1;
                 return null;
+            }
 
             List<Point> points = new List<Point>();
             points.Add(this.Start);
@@ -102,6 +105,7 @@ namespace Mesh.Curves
             }
             points.Add(this.End);
 
+            distance = this.GetLength() / this.elementCount;
             return points;
         }
     }

@@ -15,7 +15,7 @@ namespace Mesh
     /// </summary>
     public class Geometry
     {
-        public const double Epsilon = 0.00001;
+        public const double Epsilon = 0.0000000001;
         public List<Region> Regions { get; set; }
         private String Filename { get; set; }
 

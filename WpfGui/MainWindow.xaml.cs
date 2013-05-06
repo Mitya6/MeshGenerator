@@ -76,11 +76,12 @@ namespace WpfGui
         {
             this.timer.Stop();
             this.btnStart.IsEnabled = true;
-            this.lblWorking.Visibility = System.Windows.Visibility.Hidden;
         }
 
         private void OnBuildStart()
         {
+            this.triangleCount = 0;
+
             this.timer.Start();
             this.btnStart.IsEnabled = false;
             this.lblWorking.Visibility = System.Windows.Visibility.Visible;

@@ -10,7 +10,7 @@ namespace Mesh
     public class Segment : LineBase
     {
         public bool Checked { get; set; }
-        
+
         public Segment(Point start, Point end)
             : base(start, end)
         {
@@ -91,27 +91,81 @@ namespace Mesh
             return v;
         }
 
-        public bool Equals(Segment segment)
+        public bool Equals(Segment other)
         {
             // start == start && end == end
-            if (this.Start.Equals(segment.Start))
+            if (this.Start.Equals(other.Start))
             {
-                if (this.End.Equals(segment.End))
+                if (this.End.Equals(other.End))
                     return true;
             }
             // start == end && end == start (reverse dir)
-            if (this.Start.Equals(segment.End))
+            if (this.Start.Equals(other.End))
             {
-                if (this.End.Equals(segment.Start))
+                if (this.End.Equals(other.Start))
                     return true;
             }
             return false;
         }
 
+        /// <summary>
+        /// Checks if a segments end is another segments start.
+        /// </summary>
+        public bool Connected(Segment other)
+        {
+            if (/*this.Start.Equals(other.Start) || */this.Start.Equals(other.End) ||
+                this.End.Equals(other.Start)/* || this.End.Equals(other.End)*/)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Calculates the angle of two connected segments in degrees.
+        /// </summary>
+        public static double Angle(Segment s1, Segment s2)
+        {
+            Vector3D v1, v2;
+            if (s1.End.Equals(s2.Start))
+            {
+                v1 = s1.ToVector3D();
+                v2 = s2.ToVector3D();
+            }
+            else if (s2.End.Equals(s1.Start))
+            {
+                v1 = s2.ToVector3D();
+                v2 = s1.ToVector3D();
+            }
+            else
+            {
+                throw new ApplicationException("Invalid segment order");
+            }
+            double temp = Math.Acos(Vector3D.DotProduct(v1, v2)/(v1.Length*v2.Length));
+            double angle = temp * (180/Math.PI);
+            return Vector3D.CrossProduct(v1, v2).Z >= 0 ? 180 - angle : 180 + angle;
+        }
+
+        public Vector3D ToVector3D()
+        {
+            return this.End.ToVector3D() - this.Start.ToVector3D();
+        }
 
         public Segment Reverse()
         {
             return new Segment(this.End, this.Start);
+        }
+
+        public void ConnectEndpoints()
+        {
+            this.Start.Segments.Add(this);
+            this.End.Segments.Add(this);
+        }
+
+        public void DisconnectEndpoints()
+        {
+            this.Start.Segments.Remove(this);
+            this.End.Segments.Remove(this);
         }
 
         public Point Intersection(Segment other)
@@ -127,7 +181,7 @@ namespace Mesh
             Vector3D qmpxr = Vector3D.CrossProduct(qmp, r);
             Vector3D qmpxs = Vector3D.CrossProduct(qmp, s);
 
-            if (qmpxr.Length == 0.0 && qmp.Length > Geometry.Epsilon)
+            if (rxs.Z == 0 && qmpxr.Z == 0.0 && qmp.Length > Geometry.Epsilon)
             {
                 // Collinear
                 //p p+r q q+s
@@ -136,7 +190,7 @@ namespace Mesh
                     return new Point(p.X, p.Y, 0.0);
                 if ((p + r).X > Math.Min(q.X, (q + s).X) && (p + r).X < Math.Max(q.X, (q + s).X) &&
                     (p + r).Y > Math.Min(q.Y, (q + s).Y) && (p + r).Y < Math.Max(q.Y, (q + s).Y))
-                    return new Point((p+r).X, (p+r).Y, 0.0);
+                    return new Point((p + r).X, (p + r).Y, 0.0);
                 if (q.X > Math.Min(p.X, (p + r).X) && q.X < Math.Max(p.X, (p + r).X) &&
                     q.Y > Math.Min(p.Y, (p + r).Y) && q.Y < Math.Max(p.Y, (p + r).Y))
                     return new Point(q.X, q.Y, 0.0);
@@ -146,7 +200,7 @@ namespace Mesh
                 return null;
             }
 
-            if (rxs.Z == 0.0)
+            if (Math.Abs(rxs.Z) < Geometry.Epsilon)
             {
                 // Parallel.
                 return null;

@@ -33,6 +33,6 @@ namespace Mesh.Curves
             this.elementSize = elementSize;
         }
 
-        public abstract List<Point> Divide();
+        public abstract List<Point> Divide(out double distance);
     }
 }

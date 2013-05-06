@@ -36,14 +36,17 @@ namespace Mesh
         /// <summary>
         /// Divides the contour into discrete points.
         /// </summary>
-        public List<Point> Divide()
+        public List<Point> Divide(out double distance)
         {
             List<Point> contourPoints = new List<Point>();
+            double minD = Double.MaxValue;
 
             // Divide each curve in this contour.
             foreach (Curve curve in this.Curves)
             {
-                List<Point> curvePoints = curve.Divide();
+                double d;
+                List<Point> curvePoints = curve.Divide(out d);
+                if (d < minD) minD = d;
 
                 // Remove last point of the curve, it is the same as the 
                 // first point of the next curve
@@ -53,6 +56,7 @@ namespace Mesh
                 contourPoints.AddRange(curvePoints);
             }
 
+            distance = minD;
             return contourPoints;
         }
 

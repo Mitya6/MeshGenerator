@@ -11,7 +11,9 @@ namespace Mesh
         // Use of sorted list to reach shortest segment quickly.
         // Allows the duplication of keys.
         public SortedList<double, List<Segment>> Segments { get; set; }
-        public List<Point> Points { get; set; }
+        //public List<Point> Points { get; set; }
+        public List<Point> InitialPoints { get; set; }
+        public Quadtree Points { get; set; }
         public int Count
         {
             get
@@ -25,17 +27,29 @@ namespace Mesh
 
         public Front(List<Point> pts)
         {
-            this.Points = pts;
+            this.InitialPoints = pts;
+            this.Points = new Quadtree(this.InitialPoints);
+            
             this.Segments = new SortedList<double, List<Segment>>();
+            if (this.InitialPoints.Count == 0) return;
 
             // Create segments between points.
-            for (int i = 0; i < pts.Count - 1; i++)
+            for (int i = 0; i < this.InitialPoints.Count - 1; i++)
             {
-                Segment seg = new Segment(pts[i], pts[i + 1]);
+                Segment seg = new Segment(this.InitialPoints[i], this.InitialPoints[i + 1]);
                 AddSegment(seg);
             }
-            Segment s = new Segment(pts[pts.Count - 1], pts[0]);
+            Segment s = new Segment(this.InitialPoints[this.InitialPoints.Count - 1], 
+                this.InitialPoints[0]);
             AddSegment(s);
+        }
+
+        public void InitFront()
+        {
+            foreach (Point p in this.InitialPoints)
+            {
+                this.Points.Add(p);
+            }
         }
 
         /// <summary>
@@ -65,6 +79,7 @@ namespace Mesh
                 this.Segments.Add(len, new List<Segment>());
             }
             this.Segments[len].Add(segment);
+            segment.ConnectEndpoints();
         }
 
         /// <summary>
@@ -86,6 +101,7 @@ namespace Mesh
 
             Segment s = this.Segments.ElementAt(0).Value[0];
             this.Segments.ElementAt(0).Value.RemoveAt(0);
+            s.DisconnectEndpoints();
             RemoveUnconnectedEndpoints(s);
 
             if (this.Segments.ElementAt(0).Value.Count == 0)
@@ -155,6 +171,7 @@ namespace Mesh
                 this.Segments.Remove((double)toRemove);
             }
             RemoveUnconnectedEndpoints(s);
+            s.DisconnectEndpoints();
             return removed;
         }
 
@@ -231,29 +248,74 @@ namespace Mesh
         /// Determines whether the front has at least one commmon 
         /// point with another front.
         /// </summary>
-        public bool HasCommonPointWith(Front other)
-        {
-            foreach (Point point in this.Points)
-            {
-                foreach (Point otherPoint in other.Points)
-                {
-                    if (point.Equals(otherPoint))
-                        return true;
-                }
-            }
-            return false;
-        }
+        //public bool HasCommonPointWith(Front other)
+        //{
+        //    foreach (Point point in this.Points)
+        //    {
+        //        foreach (Point otherPoint in other.Points)
+        //        {
+        //            if (point.Equals(otherPoint))
+        //                return true;
+        //        }
+        //    }
+        //    return false;
+        //}
 
 
         public void Join(Front front)
         {
-            this.Points.AddRange(front.Points);
+            foreach (Point p in front.GetInitialPoints())
+            {
+                this.InitialPoints.Add(p);
+            }
 
             List<Segment> segments = front.GetSegmentsUnordered();
             foreach (Segment segment in segments)
             {
                 this.AddSegment(segment);
             }
+        }
+
+        private List<Point> GetInitialPoints()
+        {
+            return this.InitialPoints;
+        }
+
+        /// <summary>
+        /// Replaces two front points with one common point.
+        /// </summary>
+        public void ReplacePoints(Point p1, Point p2, Point midPoint)
+        {
+            // Add midPoint
+            this.Points.Add(midPoint);
+
+            // Update segment endpoints
+            List<Segment> segments = GetSegmentsUnordered();
+            foreach (Segment segment in segments)
+            {
+                if (segment.Start.Equals(p1))
+                    segment.Start = midPoint;
+                if (segment.End.Equals(p1))
+                    segment.End = midPoint;
+                if (segment.Start.Equals(p2))
+                    segment.Start = midPoint;
+                if (segment.End.Equals(p2))
+                    segment.End = midPoint;
+            }
+
+            // Remove p1 and p2
+            this.Points.Remove(p1);
+            this.Points.Remove(p2);
+        }
+
+        public List<Point> GetAllPoints()
+        {
+            return this.Points.GetAllPoints();
+        }
+
+        public List<Point> NeighbourAreaPoints(Point p, int cellDistance)
+        {
+            return this.Points.NeighbourAreaPoints(p, cellDistance);
         }
     }
 }

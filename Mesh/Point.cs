@@ -15,12 +15,18 @@ namespace Mesh
         public double X { get; set; }
         public double Y { get; set; }
         public double Z { get; set; }
+        public bool IsEdgePoint { get; set; }
+        public List<Triangle> Triangles { get; set; }
+        public List<Segment> Segments { get; set; }
 
         public Point(double x, double y, double z)
         {
-            X = x;
-            Y = y;
-            Z = z;
+            this.X = x;
+            this.Y = y;
+            this.Z = z;
+            this.IsEdgePoint = false;
+            this.Triangles = new List<Triangle>();
+            this.Segments = new List<Segment>();
         }
 
         /// <summary>

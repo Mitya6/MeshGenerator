@@ -2,7 +2,7 @@
 <Geometry>
   <!-- XY plane figure-->
   <Region>
-    <Contour type="Outer" elementSize="0.2">
+    <Contour type="Outer" elementSize="0.08">
       <Point x="-1.0" y="-1.0" z="0.0"/>
       <Point x="5.0" y="-2.0" z="0.0"/>
       <Point x="2.5" y="1.5" z="0.0"/>
@@ -14,7 +14,7 @@
       <Line p1="3" p2="4"/>
       <Line p1="4" p2="0"/>
     </Contour>
-    <Contour type="Inner" elementSize="0.2">
+    <Contour type="Inner" elementSize="0.08">
       <Point x="1.0" y="2.0" z="0.0"/>
       <Point x="0.0" y="3.0" z="0.0"/>
       <Point x="1.0" y="4.0" z="0.0"/>
@@ -24,7 +24,7 @@
       <Line p1="2" p2="3"/>
       <Line p1="3" p2="0"/>
     </Contour>
-    <Contour type="Inner" elementSize="0.2">
+    <Contour type="Inner" elementSize="0.08">
       <Point x="1.5" y="1.0" z="0.0"/>
       <Point x="2.5" y="-0.5" z="0.0"/>
       <Point x="0.5" y="-0.5" z="0.0"/>

@@ -49,6 +49,7 @@
     <Compile Include="Enum\MeshTypes.cs" />
     <Compile Include="LineBase.cs" />
     <Compile Include="Plane.cs" />
+    <Compile Include="Quadtree.cs" />
     <Compile Include="Transformation.cs" />
     <Compile Include="DelaunayMesh.cs" />
     <Compile Include="Front.cs" />

@@ -10,12 +10,16 @@ namespace Mesh
     {
         private double radiusMultiplier;
         private double idealDistance;
+        private double sharpAngleThreshold;
+        private int cellDistance;
 
         public AdvancingFrontMesh(Region region)
             : base(region)
         {
             this.radiusMultiplier = 0.7;
             this.idealDistance = Double.MaxValue;
+            this.sharpAngleThreshold = 25;
+            this.cellDistance = 2;
         }
 
         /// <summary>
@@ -31,31 +35,39 @@ namespace Mesh
 
             // Check inner/outer contour numbers.
 
-            // Divide contours into segments.
-            this.Fronts = this.OwnerRegion.DivideContours();
+            // Divide contours into segments and create initial front.
+            double distance;
+            this.Front = this.OwnerRegion.DivideContours(out distance);
+            this.idealDistance = distance;
+            this.Front.Points.BuildRecursive(this.idealDistance);
+            this.Front.Points.ConnectNeighbours();
+            this.Front.InitFront();
 
             // Calculate min ideal point distance from base segment.
-            CalculateIdealDistance();
+            //CalculateIdealDistance();
+
+            // Initialize Quadtree to store mesh points.
+            this.Points = new Quadtree(/*this.Front.Points.Left, this.Front.Points.Top,
+                this.Front.Points.Right, this.Front.Points.Bottom*/this.Front.GetAllPoints());
+            this.Points.BuildRecursive(this.idealDistance);
+            this.Points.ConnectNeighbours();
 
             // Form triangles
-            ProcessFronts();
+            ProcessFront();
         }
 
         // temporary solution, needs to be rewrited
-        private void CalculateIdealDistance()
-        {
-            foreach (Front f in this.Fronts)
-            {
-                List<Segment> segments = f.GetSegmentsUnordered();
-                foreach (Segment segment in segments)
-                {
-                    if (segment.GetLength() < this.idealDistance)
-                    {
-                        this.idealDistance = segment.GetLength();
-                    }
-                }
-            }
-        }
+        //private void CalculateIdealDistance()
+        //{
+        //    List<Segment> segments = this.Front.GetSegmentsUnordered();
+        //    foreach (Segment segment in segments)
+        //    {
+        //        if (segment.GetLength() < this.idealDistance)
+        //        {
+        //            this.idealDistance = segment.GetLength();
+        //        }
+        //    }
+        //}
 
         // Refinement needed (3 points on the same straight).
         /// <summary>
@@ -79,31 +91,32 @@ namespace Mesh
             }
         }
 
-        private void ProcessFronts()
+        private void ProcessFront()
         {
-            foreach (Front front in this.Fronts)
+            // Add front points to output points.
+            foreach (Point p in this.Front.GetAllPoints())
             {
-                // Add front points to output points.
-                this.Points.AddRange(front.Points);
+                this.Points.Add(p);
             }
 
-
-            while (GetMeshSegmentCount() > 0)
+            while (this.Front.Count > 0)
             {
-                Segment shortestSegment = GetShortestUncheckedSegment();
+                Segment shortestSegment = this.Front.GetShortestUncheckedSegment();
 
-                //debug
-                // ha semelyik segmensre sem lehet 3szöget illeszteni, akkor:
-                // 1) 3 hosszú kör keresés és 3szög formálás
-                // 2) 4 hosszú kör keresés
-                //      2a) nagy szögek -> közelebbi pontpár összeköt
-                //      2b) kis szögek -> pontösszevonás
                 if (shortestSegment == null)
                 {
-                    int dd = 1;
-                    return;
+                    DecreaseFront();
+                    ResetCheckedFlag();
+                    continue;
                 }
-                //debug
+
+                ////////////////////////////***************
+                if (this.Triangles.Count == 2046 && shortestSegment.Start.X < 2.15
+                    && shortestSegment.Start.X > 2.05)
+                {
+                    int i = 2;
+                }
+                ////////////////////////////***************
 
                 shortestSegment.Checked = true;
 
@@ -118,15 +131,13 @@ namespace Mesh
 
                 while (nearbyPoints.Count > 0)
                 {
-                    bool formed =
-                        TryFormTriangle(shortestSegment, nearbyPoints[0], nearbyPoints.Count != 1);
+                    bool formed = TryFormTriangle(
+                        shortestSegment, nearbyPoints[0], nearbyPoints.Count != 1);
 
                     // Reset checked flag
                     if (formed)
                     {
-                        foreach (Front front in this.Fronts)
-                            foreach (Segment seg in front.GetSegmentsUnordered())
-                                seg.Checked = false;
+                        ResetCheckedFlag();
                         break;
                     }
 
@@ -134,6 +145,152 @@ namespace Mesh
                 }
             }
 
+        }
+
+        private void DecreaseFront()
+        {
+            if (this.Front.Count < 3)
+            {
+                throw new ApplicationException("Front processing error");
+            }
+
+            List<Segment> segments = this.Front.GetSegmentsUnordered();
+
+            // Find 3 long cycle and form triangle if possible
+            for (int i = 0; i < this.Front.Count; i++)
+                for (int j = 0; j < this.Front.Count; j++)
+                    for (int k = 0; k < this.Front.Count; k++)
+                    {
+                        if (i == j || j == k || k == i) continue;
+
+                        if (segments[i].End.Equals(segments[j].Start) &&
+                            segments[j].End.Equals(segments[k].Start) &&
+                            segments[k].End.Equals(segments[i].Start))
+                        {
+                            AddTriangle(segments[i].Start, segments[j].Start,
+                                segments[k].Start);
+                            this.Front.RemoveSegment(segments[i]);
+                            this.Front.RemoveSegment(segments[j]);
+                            this.Front.RemoveSegment(segments[k]);
+                            return;
+                        }
+                    }
+
+            // find 4 or longer cycle and reduce it
+            //      2a) nagy szögek -> közelebbi pontpár összeköt
+            //      2b) kis szögek -> pontösszevonás
+            for (int i = 0; i < segments.Count; i++)
+                for (int j = i + 1; j < segments.Count; j++)
+                {
+                    if (segments[i].Connected(segments[j]))
+                    {
+                        if (Segment.Angle(segments[i], segments[j]) < sharpAngleThreshold)
+                        {
+                            TryContractVertices(segments[i], segments[j]);
+                            this.Front.RemoveSegment(segments[i]);
+                            this.Front.RemoveSegment(segments[j]);
+                            // Remove possible 2 long circles
+                            Clean2Loops();
+                            return;
+                        }
+                    }
+                }
+
+            // temp
+            // debug
+            List<Point> ptss = this.Front.GetAllPoints();
+            // debug
+            throw new ApplicationException("temp finish");
+            
+        }
+
+        private void Clean2Loops()
+        {
+            List<Segment> segments = this.Front.GetSegmentsUnordered();
+            for (int i = 0; i < segments.Count; i++)
+            {
+                for (int j = i + 1; j < segments.Count; j++)
+                {
+                    if (segments[i].Equals(segments[j]))
+                    {
+                        this.Front.RemoveSegment(segments[i]);
+                        this.Front.RemoveSegment(segments[j]);
+                    }
+                }
+            }
+        }
+
+        private void TryContractVertices(Segment s1, Segment s2)
+        {
+            Point p1, p2, common;
+            if (s1.End.Equals(s2.Start))
+            {
+                common = s1.End;
+                p1 = s1.Start;
+                p2 = s2.End;
+            }
+            else if (s1.Start.Equals(s2.End))
+            {
+                common = s1.Start;
+                p2 = s1.End;
+                p1 = s2.Start;
+            }
+            else
+            {
+                throw new ApplicationException("Invalid segment order");
+            }
+
+            if (p1.IsEdgePoint && p2.IsEdgePoint)
+            {
+                AddTriangle(p1, p2, common);
+                this.Front.AddSegment(new Segment(p1, p2));
+            }
+            else
+            {
+                Point midPoint;
+                if (p1.IsEdgePoint)
+                    midPoint = p1;
+                else if (p2.IsEdgePoint)
+                    midPoint = p2;
+                else
+                {
+                    midPoint = new Point((p1.X + p2.X) / 2, (p1.Y + p2.Y) / 2, 0);
+                }
+                ReplacePoints(p1, p2, midPoint);
+            }
+        }
+
+        private void ReplacePoints(Point p1, Point p2, Point midPoint)
+        {
+            // Replace points in front
+            this.Front.ReplacePoints(p1, p2, midPoint);
+
+            // Replace points in mesh
+
+            // Add midpoint to output points
+            this.Points.Add(midPoint);
+
+            // Replace points in triangles
+            foreach (Triangle triangle in this.Triangles)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    if (p1.Equals(triangle.Points[i]))
+                        triangle.Points[i] = midPoint;
+                    if (p2.Equals(triangle.Points[i]))
+                        triangle.Points[i] = midPoint;
+                }
+            }
+
+            // Remove p1 and p2
+            this.Points.Remove(p1);
+            this.Points.Remove(p2);
+        }
+
+        private void ResetCheckedFlag()
+        {
+            foreach (Segment seg in this.Front.GetSegmentsUnordered())
+                seg.Checked = false;
         }
 
         private bool TryFormTriangle(Segment shortestSegment, Point p, bool existingPoint)
@@ -145,167 +302,121 @@ namespace Mesh
             List<Segment> SegmentsToRemove = new List<Segment>();
 
             // Check if triangle can be formed
-            if (this.Contains(newSegment1))
+            if (this.Front.Contains(newSegment1))
             {
                 SegmentsToRemove.Add(newSegment1);
             }
             else
             {
                 // Test if triangle candidate intersects with existing elements
-                if (IsIntersecting(newSegment1) == false) return false;
+                if (IsIntersecting(newSegment1)) return false;
                 SegmentsToAdd.Add(newSegment1);
             }
 
-            if (this.Contains(newSegment2))
+            if (this.Front.Contains(newSegment2))
             {
                 SegmentsToRemove.Add(newSegment2);
             }
             else
             {
                 // Test if triangle candidate intersects with existing elements
-                if (IsIntersecting(newSegment2) == false) return false;
+                if (IsIntersecting(newSegment2)) return false;
                 SegmentsToAdd.Add(newSegment2);
             }
 
             // update front and form triangle
 
             // Remove current segment from the front.
-            Front activeFront = null;
-            foreach (Front f in this.Fronts)
-            {
-                if (f.RemoveSegment(shortestSegment))
-                    activeFront = f;
-            }
+            this.Front.RemoveSegment(shortestSegment);
 
             // Update front with new segments.
             if (!existingPoint)
             {
                 this.Points.Add(p);
-                activeFront.Points.Add(p);
+                this.Front.Points.Add(p);
             }
             foreach (Segment s in SegmentsToAdd)
             {
-                activeFront.AddSegment(s);
+                this.Front.AddSegment(s);
             }
             foreach (Segment s in SegmentsToRemove)
             {
-                activeFront.RemoveSegment(s);
+                this.Front.RemoveSegment(s);
             }
 
-            this.Triangles.Add(new Triangle(shortestSegment.Start, shortestSegment.End, p));
-            this.OwnerRegion.Geo.RaiseTriangleAdded();
-
-
-            // közös pont => frontok összevonása
-            bool possibleCommonPoint = true;
-            do
-            {
-                possibleCommonPoint = TryUniteFronts();
-            } while (possibleCommonPoint);
+            AddTriangle(shortestSegment.Start, shortestSegment.End, p);
 
             return true;
         }
 
-        private bool TryUniteFronts()
+        private void AddTriangle(Point p1, Point p2, Point p3)
         {
-            for (int i = 0; i < this.Fronts.Count; i++)
+            Triangle t = new Triangle(p1, p2, p3);
+            this.Triangles.Add(t);
+
+            foreach (Point p in t.Points)
             {
-                for (int j = i + 1; j < this.Fronts.Count; j++)
-                {
-                    bool needUnion = this.Fronts[i].HasCommonPointWith(this.Fronts[j]);
-                    this.Fronts[i].Join(this.Fronts[j]);
-                    this.Fronts.Remove(this.Fronts[j]);
-                    return true;
-                }
+                p.Triangles.Add(t);
             }
-            return false;
-        }
-
-        private int GetMeshSegmentCount()
-        {
-            int count = 0;
-            foreach (Front front in this.Fronts)
-            {
-                count += front.Segments.Count;
-            }
-            return count;
-        }
-
-        private Segment GetShortestUncheckedSegment()
-        {
-            double shortest = Double.MaxValue;
-            Segment shortestSegment = null;
-            foreach (Front front in this.Fronts)
-            {
-                Segment current = front.GetShortestUncheckedSegment();
-
-                if (current == null)
-                {
-                    return null;
-                }
-
-                if (current.GetLength() < shortest)
-                {
-                    shortest = current.GetLength();
-                    shortestSegment = current;
-                }
-            }
-            return shortestSegment;
-        }
-
-        private bool Contains(Segment segment)
-        {
-            foreach (Front front in this.Fronts)
-            {
-                if (front.Contains(segment))
-                    return true;
-            }
-            return false;
+            this.OwnerRegion.Geo.RaiseTriangleAdded();
         }
 
         private bool IsIntersecting(Segment s)
         {
+            List<Triangle> triangles = new List<Triangle>();
+            foreach (Point p in this.Points.NeighbourAreaPoints(s.Start, cellDistance))
+            {
+                triangles.AddRange(p.Triangles);
+            }
+            foreach (Point p in this.Points.NeighbourAreaPoints(s.End, cellDistance))
+            {
+                triangles.AddRange(p.Triangles);
+            }
+
             // Check intersection for triangles
-            foreach (Triangle triangle in this.Triangles)
+            foreach (Triangle triangle in triangles)
             {
                 Point p1 = s.Intersection(new Segment(triangle.Points[0], triangle.Points[1]));
                 Point p2 = s.Intersection(new Segment(triangle.Points[1], triangle.Points[2]));
                 Point p3 = s.Intersection(new Segment(triangle.Points[2], triangle.Points[0]));
                 if (p1 != null || p2 != null || p3 != null)
-                    return false;
+                    return true;
             }
 
             // Check intersection for segments of all fronts
             List<Segment> segments = new List<Segment>();
-            foreach (Front front in this.Fronts)
+            foreach (Point p in this.Front.NeighbourAreaPoints(s.Start, cellDistance))
             {
-                segments.AddRange(front.GetSegmentsUnordered());
+                segments.AddRange(p.Segments);
             }
+            foreach (Point p in this.Front.NeighbourAreaPoints(s.End, cellDistance))
+            {
+                segments.AddRange(p.Segments);
+            }
+
             foreach (Segment other in segments)
             {
                 Point p = s.Intersection(other);
                 if (p != null)
-                    return false;
+                    return true;
             }
 
-            return true;
+            return false;
         }
 
         // to be improved (store points in tree structure)
         private List<Point> GetNearbyPoints(Point idealPoint, double r)
         {
-            List<Point> pts = new List<Point>();
-            foreach (Front f in this.Fronts)
+            List<Point> pts = this.Front.NeighbourAreaPoints(idealPoint, cellDistance);
+            List<Point> nearbyPoints = new List<Point>();
+            foreach (Point p in pts)
             {
-                foreach (Point p in f.Points)
+                if (Point.Distance(idealPoint, p) <= r)
                 {
-                    if (Point.Distance(idealPoint, p) <= r)
-                    {
-                        pts.Add(p);
-                    }
+                    nearbyPoints.Add(p);
                 }
             }
-            return pts;
+            return nearbyPoints;
         }
     }
 }
