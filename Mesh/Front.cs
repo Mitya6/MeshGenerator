@@ -14,16 +14,16 @@ namespace Mesh
         //public List<Point> Points { get; set; }
         public List<Point> InitialPoints { get; set; }
         public Quadtree Points { get; set; }
-        public int Count
-        {
-            get
-            {
-                int i = 0;
-                foreach (var item in Segments)
-                    foreach (Segment s in item.Value) i++;
-                return i;
-            }
-        }
+        //public int Count
+        //{
+        //    get
+        //    {
+        //        int i = 0;
+        //        foreach (var item in Segments)
+        //            foreach (Segment s in item.Value) i++;
+        //        return i;
+        //    }
+        //}
 
         public Front(List<Point> pts)
         {
@@ -209,9 +209,9 @@ namespace Mesh
         /// <summary>
         /// Checks if the front contains a segment.
         /// </summary>
-        public bool Contains(Segment s)
+        public bool Contains(Segment s, int cellDistance)
         {
-            List<Segment> segments = GetSegmentsUnordered();
+            HashSet<Segment> segments = s.GetNearbySegments(this, cellDistance);//GetSegmentsUnordered();
             foreach (Segment segment in segments)
             {
                 if (segment.Equals(s))

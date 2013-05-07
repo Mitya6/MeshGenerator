@@ -99,7 +99,7 @@ namespace Mesh
                 this.Points.Add(p);
             }
 
-            while (this.Front.Count > 0)
+            while (this.Front.Segments.Count > 0)
             {
                 Segment shortestSegment = this.Front.GetShortestUncheckedSegment();
 
@@ -111,8 +111,8 @@ namespace Mesh
                 }
 
                 ////////////////////////////***************
-                //if (this.Triangles.Count == 2046 && shortestSegment.Start.X < 2.15
-                //    && shortestSegment.Start.X > 2.05)
+                //if (this.Triangles.Count == 11289 && shortestSegment.Start.X <1.82
+                //    && shortestSegment.Start.X > 1.8)
                 //{
                 //    int i = 2;
                 //}
@@ -149,17 +149,17 @@ namespace Mesh
 
         private void DecreaseFront()
         {
-            if (this.Front.Count < 3)
+            List<Segment> segments = this.Front.GetSegmentsUnordered();
+
+            if (segments.Count < 3)
             {
                 throw new ApplicationException("Front processing error");
             }
-
-            List<Segment> segments = this.Front.GetSegmentsUnordered();
-
+            
             // Find 3 long cycle and form triangle if possible
-            for (int i = 0; i < this.Front.Count; i++)
-                for (int j = 0; j < this.Front.Count; j++)
-                    for (int k = 0; k < this.Front.Count; k++)
+            for (int i = 0; i < segments.Count; i++)
+                for (int j = 0; j < segments.Count; j++)
+                    for (int k = 0; k < segments.Count; k++)
                     {
                         if (i == j || j == k || k == i) continue;
 
@@ -196,12 +196,8 @@ namespace Mesh
                     }
                 }
 
-            // temp
-            // debug
-            //List<Point> ptss = this.Front.GetAllPoints();
-            // debug
             throw new ApplicationException("temp finish");
-            
+
         }
 
         private void Clean2Loops()
@@ -302,7 +298,7 @@ namespace Mesh
             List<Segment> SegmentsToRemove = new List<Segment>();
 
             // Check if triangle can be formed
-            if (this.Front.Contains(newSegment1))
+            if (this.Front.Contains(newSegment1, cellDistance))
             {
                 SegmentsToRemove.Add(newSegment1);
             }
@@ -310,10 +306,14 @@ namespace Mesh
             {
                 // Test if triangle candidate intersects with existing elements
                 if (IsIntersecting(newSegment1)) return false;
+
+                // Test if segment is outside of the front
+                if (!this.Front.IsPointInside(newSegment1.GetPoint(0.5))) return false;
+
                 SegmentsToAdd.Add(newSegment1);
             }
 
-            if (this.Front.Contains(newSegment2))
+            if (this.Front.Contains(newSegment2, cellDistance))
             {
                 SegmentsToRemove.Add(newSegment2);
             }
@@ -321,6 +321,10 @@ namespace Mesh
             {
                 // Test if triangle candidate intersects with existing elements
                 if (IsIntersecting(newSegment2)) return false;
+
+                // Test if segment is outside of the front
+                if (!this.Front.IsPointInside(newSegment2.GetPoint(0.5))) return false;
+
                 SegmentsToAdd.Add(newSegment2);
             }
 
@@ -370,65 +374,54 @@ namespace Mesh
         /// </summary>
         private bool IsIntersecting(Segment s)
         {
+            bool intersecting = false;
+
             // Get nearby triangles
-            HashSet<Triangle> triangles = new HashSet<Triangle>();
-            //List<Triangle> triangles = new List<Triangle>();
-            foreach (Point p in this.Points.NeighbourAreaPoints(s.Start, cellDistance))
-            {
-                //triangles.AddRange(p.Triangles);
-                foreach (var item in p.Triangles)
-                {
-                    triangles.Add(item);
-                }
-            }
-            foreach (Point p in this.Points.NeighbourAreaPoints(s.End, cellDistance))
-            {
-                //triangles.AddRange(p.Triangles);
-                foreach (var item in p.Triangles)
-                {
-                    triangles.Add(item);
-                }
-            }
+            HashSet<Triangle> triangles = s.GetNearbyTriangles(this, cellDistance);
 
             // Check intersection with nearby triangles
-            foreach (Triangle triangle in triangles)
+            //foreach (Triangle triangle in triangles)
+            //{
+            //    Point p1 = s.Intersection(new Segment(triangle.Points[0], triangle.Points[1]));
+            //    Point p2 = s.Intersection(new Segment(triangle.Points[1], triangle.Points[2]));
+            //    Point p3 = s.Intersection(new Segment(triangle.Points[2], triangle.Points[0]));
+            //    if (p1 != null || p2 != null || p3 != null)
+            //        return true;
+            //}
+            Parallel.ForEach(triangles, (triangle, state) =>
             {
                 Point p1 = s.Intersection(new Segment(triangle.Points[0], triangle.Points[1]));
                 Point p2 = s.Intersection(new Segment(triangle.Points[1], triangle.Points[2]));
                 Point p3 = s.Intersection(new Segment(triangle.Points[2], triangle.Points[0]));
                 if (p1 != null || p2 != null || p3 != null)
-                    return true;
-            }
+                {
+                    intersecting = true;
+                    state.Stop();
+                }
+            });
 
             // Get nearby segments of the front
-            HashSet<Segment> segments = new HashSet<Segment>();
-            //List<Segment> segments = new List<Segment>();
-            foreach (Point p in this.Front.NeighbourAreaPoints(s.Start, cellDistance))
-            {
-                //segments.AddRange(p.Segments);
-                foreach (var item in p.Segments)
-                {
-                    segments.Add(item);
-                }
-            }
-            foreach (Point p in this.Front.NeighbourAreaPoints(s.End, cellDistance))
-            {
-                //segments.AddRange(p.Segments);
-                foreach (var item in p.Segments)
-                {
-                    segments.Add(item);
-                }
-            }
-
+            HashSet<Segment> segments = s.GetNearbySegments(this.Front, cellDistance);
+            
             // Check intersecion with nearby segments
-            foreach (Segment other in segments)
+            //foreach (Segment other in segments)
+            //{
+            //    Point p = s.Intersection(other);
+            //    if (p != null)
+            //        return true;
+            //}
+            Parallel.ForEach(segments, (other, state) =>
             {
                 Point p = s.Intersection(other);
                 if (p != null)
-                    return true;
-            }
+                {
+                    intersecting = true;
+                    state.Stop();
+                }
+            });
 
-            return false;
+            //return false;
+            return intersecting;
         }
 
         /// <summary>

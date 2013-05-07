@@ -141,8 +141,8 @@ namespace Mesh
             {
                 throw new ApplicationException("Invalid segment order");
             }
-            double temp = Math.Acos(Vector3D.DotProduct(v1, v2)/(v1.Length*v2.Length));
-            double angle = temp * (180/Math.PI);
+            double temp = Math.Acos(Vector3D.DotProduct(v1, v2) / (v1.Length * v2.Length));
+            double angle = temp * (180 / Math.PI);
             return Vector3D.CrossProduct(v1, v2).Z >= 0 ? 180 - angle : 180 + angle;
         }
 
@@ -181,7 +181,8 @@ namespace Mesh
             Vector3D qmpxr = Vector3D.CrossProduct(qmp, r);
             Vector3D qmpxs = Vector3D.CrossProduct(qmp, s);
 
-            if (rxs.Z == 0 && qmpxr.Z == 0.0 && qmp.Length > Geometry.Epsilon)
+            if (/*rxs.Z == 0 && qmpxr.Z == 0.0*/ Math.Abs(rxs.Z) < Geometry.Epsilon
+                && Math.Abs(qmpxr.Z) < Geometry.Epsilon && qmp.Length > Geometry.Epsilon)
             {
                 // Collinear
                 //p p+r q q+s
@@ -215,6 +216,46 @@ namespace Mesh
                 return this.GetPoint(t);
             }
             return null;
+        }
+
+        public HashSet<Triangle> GetNearbyTriangles(AdvancingFrontMesh mesh, int cellDistance)
+        {
+            HashSet<Triangle> triangles = new HashSet<Triangle>();
+            foreach (Point p in mesh.Points.NeighbourAreaPoints(this.Start, cellDistance))
+            {
+                foreach (var item in p.Triangles)
+                {
+                    triangles.Add(item);
+                }
+            }
+            foreach (Point p in mesh.Points.NeighbourAreaPoints(this.End, cellDistance))
+            {
+                foreach (var item in p.Triangles)
+                {
+                    triangles.Add(item);
+                }
+            }
+            return triangles;
+        }
+
+        public HashSet<Segment> GetNearbySegments(Front front, int cellDistance)
+        {
+            HashSet<Segment> segments = new HashSet<Segment>();
+            foreach (Point p in front.NeighbourAreaPoints(this.Start, cellDistance))
+            {
+                foreach (var item in p.Segments)
+                {
+                    segments.Add(item);
+                }
+            }
+            foreach (Point p in front.NeighbourAreaPoints(this.End, cellDistance))
+            {
+                foreach (var item in p.Segments)
+                {
+                    segments.Add(item);
+                }
+            }
+            return segments;
         }
     }
 }
