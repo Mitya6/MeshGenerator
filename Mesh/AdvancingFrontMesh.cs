@@ -111,11 +111,11 @@ namespace Mesh
                 }
 
                 ////////////////////////////***************
-                if (this.Triangles.Count == 2046 && shortestSegment.Start.X < 2.15
-                    && shortestSegment.Start.X > 2.05)
-                {
-                    int i = 2;
-                }
+                //if (this.Triangles.Count == 2046 && shortestSegment.Start.X < 2.15
+                //    && shortestSegment.Start.X > 2.05)
+                //{
+                //    int i = 2;
+                //}
                 ////////////////////////////***************
 
                 shortestSegment.Checked = true;
@@ -125,7 +125,7 @@ namespace Mesh
 
                 // Search for nearby points.
                 double radius = idealDistance * radiusMultiplier;
-                List<Point> nearbyPoints = GetNearbyPoints(idealPoint, radius);
+                List<Point> nearbyPoints = GetNearbyFrontPoints(idealPoint, radius);
                 Point.SortByDistance(nearbyPoints, idealPoint);
                 nearbyPoints.Add(idealPoint);
 
@@ -198,7 +198,7 @@ namespace Mesh
 
             // temp
             // debug
-            List<Point> ptss = this.Front.GetAllPoints();
+            //List<Point> ptss = this.Front.GetAllPoints();
             // debug
             throw new ApplicationException("temp finish");
             
@@ -349,6 +349,10 @@ namespace Mesh
             return true;
         }
 
+        /// <summary>
+        /// Adds a triangle to the mesh specified by the three points and
+        /// fires the triangle added event.
+        /// </summary>
         private void AddTriangle(Point p1, Point p2, Point p3)
         {
             Triangle t = new Triangle(p1, p2, p3);
@@ -361,19 +365,32 @@ namespace Mesh
             this.OwnerRegion.Geo.RaiseTriangleAdded();
         }
 
+        /// <summary>
+        /// Checks if the segment is intersecting with nearby front and mesh elements.
+        /// </summary>
         private bool IsIntersecting(Segment s)
         {
-            List<Triangle> triangles = new List<Triangle>();
+            // Get nearby triangles
+            HashSet<Triangle> triangles = new HashSet<Triangle>();
+            //List<Triangle> triangles = new List<Triangle>();
             foreach (Point p in this.Points.NeighbourAreaPoints(s.Start, cellDistance))
             {
-                triangles.AddRange(p.Triangles);
+                //triangles.AddRange(p.Triangles);
+                foreach (var item in p.Triangles)
+                {
+                    triangles.Add(item);
+                }
             }
             foreach (Point p in this.Points.NeighbourAreaPoints(s.End, cellDistance))
             {
-                triangles.AddRange(p.Triangles);
+                //triangles.AddRange(p.Triangles);
+                foreach (var item in p.Triangles)
+                {
+                    triangles.Add(item);
+                }
             }
 
-            // Check intersection for triangles
+            // Check intersection with nearby triangles
             foreach (Triangle triangle in triangles)
             {
                 Point p1 = s.Intersection(new Segment(triangle.Points[0], triangle.Points[1]));
@@ -383,17 +400,27 @@ namespace Mesh
                     return true;
             }
 
-            // Check intersection for segments of all fronts
-            List<Segment> segments = new List<Segment>();
+            // Get nearby segments of the front
+            HashSet<Segment> segments = new HashSet<Segment>();
+            //List<Segment> segments = new List<Segment>();
             foreach (Point p in this.Front.NeighbourAreaPoints(s.Start, cellDistance))
             {
-                segments.AddRange(p.Segments);
+                //segments.AddRange(p.Segments);
+                foreach (var item in p.Segments)
+                {
+                    segments.Add(item);
+                }
             }
             foreach (Point p in this.Front.NeighbourAreaPoints(s.End, cellDistance))
             {
-                segments.AddRange(p.Segments);
+                //segments.AddRange(p.Segments);
+                foreach (var item in p.Segments)
+                {
+                    segments.Add(item);
+                }
             }
 
+            // Check intersecion with nearby segments
             foreach (Segment other in segments)
             {
                 Point p = s.Intersection(other);
@@ -404,14 +431,17 @@ namespace Mesh
             return false;
         }
 
-        // to be improved (store points in tree structure)
-        private List<Point> GetNearbyPoints(Point idealPoint, double r)
+        /// <summary>
+        /// Returns those points of the front that fall within the given radius
+        /// of a central point.
+        /// </summary>
+        private List<Point> GetNearbyFrontPoints(Point centre, double r)
         {
-            List<Point> pts = this.Front.NeighbourAreaPoints(idealPoint, cellDistance);
+            List<Point> pts = this.Front.NeighbourAreaPoints(centre, cellDistance);
             List<Point> nearbyPoints = new List<Point>();
             foreach (Point p in pts)
             {
-                if (Point.Distance(idealPoint, p) <= r)
+                if (Point.Distance(centre, p) <= r)
                 {
                     nearbyPoints.Add(p);
                 }

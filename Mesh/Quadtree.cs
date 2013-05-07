@@ -14,7 +14,6 @@ namespace Mesh
         public double Bottom { get; set; }
         private double verticalHalf;
         private double horizontalHalf;
-        private List<Point> pts;
 
         public Quadtree Root { get; set; }
         public Quadtree[] Children { get; set; }
@@ -47,20 +46,6 @@ namespace Mesh
             double centery = (maxy + miny) / 2;
 
             InitQuadtree(centerx - size, centery + size, centerx + size, centery - size, this);
-        }
-
-        private void InitQuadtree(double left, double top, double right, double bottom, Quadtree root)
-        {
-            this.Left = left;
-            this.Top = top;
-            this.Right = right;
-            this.Bottom = bottom;
-            this.Children = null;
-            this.Neighbours = new Quadtree[4];
-            this.Root = root;
-
-            this.verticalHalf = (this.Left + this.Right) / 2;
-            this.horizontalHalf = (this.Top + this.Bottom) / 2;
         }
 
         /// <summary>
@@ -108,15 +93,6 @@ namespace Mesh
         {
             if (IsLeaf())
             {
-                ////// debug
-                if (this.Bottom > -1.91 && this.Bottom < -1.89 &&
-                    this.Left < -0.43 && this.Left > -0.44)
-                {
-                    int dds = 2;
-                }
-                ////
-
-
                 // Add neighbour references.
                 Point center = new Point(this.verticalHalf, this.horizontalHalf, 0);
                 this.Neighbours[0] = Root.Find(new Point(center.X - Size, center.Y, 0));
@@ -137,10 +113,7 @@ namespace Mesh
         /// </summary>
         public List<Point> GetAllPoints()
         {
-            if (IsLeaf())
-            {
-                return this.Points;
-            }
+            if (IsLeaf()) return this.Points;
 
             List<Point> pts = new List<Point>();
             foreach (Quadtree qt in this.Children)
@@ -150,22 +123,25 @@ namespace Mesh
             return pts;
         }
 
-        int ctr = 0;
+        /// <summary>
+        /// Returns if the quadtree is a leaf and has no further children.
+        /// </summary>
         public bool IsLeaf()
         {
-            ctr++;
-            if (ctr == 1000)
-            {
-                int j = 1;
-            }
             return this.Children == null;
         }
 
+        /// <summary>
+        /// Adds a point to the quadtree structure.
+        /// </summary>
         public void Add(Point p)
         {
             Find(p).Points.Add(p);
         }
 
+        /// <summary>
+        /// Removes a point from the quadtree structure.
+        /// </summary>
         public void Remove(Point p)
         {
             Find(p).Points.Remove(p);
@@ -180,16 +156,10 @@ namespace Mesh
             {
                 List<Point> pts = new List<Point>();
 
+                // Collect points from each neighbouring leaf.
                 for (int x = -distance; x <= distance; x++)
                     for (int y = -distance; y <= distance; y++)
                     {
-                        /////// debug
-                        if (x < 0 && y==1)
-                        {
-                            int h = 6;
-                        }
-                        /////////
-
                         int xpos = x, ypos = y;
                         Quadtree current = this;
 
@@ -218,14 +188,6 @@ namespace Mesh
             }
 
             Quadtree targetCell = Find(p);
-
-            ///////////////
-            if (targetCell == null)
-            {
-                int dds = 1;
-            }
-            //////////////////
-
             return targetCell.NeighbourAreaPoints(p, distance);
         }
 
@@ -263,6 +225,23 @@ namespace Mesh
                 else
                     return this.Children[2].Find(p);
             }
+        }
+
+        /// <summary>
+        /// Initializes quadtree object after all parameter values are known.
+        /// </summary>
+        private void InitQuadtree(double left, double top, double right, double bottom, Quadtree root)
+        {
+            this.Left = left;
+            this.Top = top;
+            this.Right = right;
+            this.Bottom = bottom;
+            this.Children = null;
+            this.Neighbours = new Quadtree[4];
+            this.Root = root;
+
+            this.verticalHalf = (this.Left + this.Right) / 2;
+            this.horizontalHalf = (this.Top + this.Bottom) / 2;
         }
     }
 }

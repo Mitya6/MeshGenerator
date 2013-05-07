@@ -31,6 +31,7 @@ namespace WpfGui
         private Mesh.Geometry geo;
         private int triangleCount = 0;
         private Timer timer;
+        private DateTime time;
 
         public MainWindow()
         {
@@ -51,7 +52,11 @@ namespace WpfGui
             {
                 Application.Current.Dispatcher.BeginInvoke(
                     DispatcherPriority.Background, new Action(() =>
-                        this.lblWorking.Content = "Triangles: " + triangleCount));
+                    {
+                        this.time = this.time.AddMilliseconds(100);
+                        this.lblWorking.Content = "Triangles: " + triangleCount +
+                        "\nTime: " + this.time.ToLongTimeString();
+                    }));
             };
         }
 
@@ -83,6 +88,7 @@ namespace WpfGui
             this.triangleCount = 0;
 
             this.timer.Start();
+            this.time = new DateTime(2000, 1, 1, 0, 0, 0, 0);
             this.btnStart.IsEnabled = false;
             this.lblWorking.Visibility = System.Windows.Visibility.Visible;
         }
