@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Mesh
@@ -11,19 +12,8 @@ namespace Mesh
         // Use of sorted list to reach shortest segment quickly.
         // Allows the duplication of keys.
         public SortedList<double, List<Segment>> Segments { get; set; }
-        //public List<Point> Points { get; set; }
         public List<Point> InitialPoints { get; set; }
         public Quadtree Points { get; set; }
-        //public int Count
-        //{
-        //    get
-        //    {
-        //        int i = 0;
-        //        foreach (var item in Segments)
-        //            foreach (Segment s in item.Value) i++;
-        //        return i;
-        //    }
-        //}
 
         public Front(List<Point> pts)
         {
@@ -199,6 +189,7 @@ namespace Mesh
                     }
                 }
             }
+            
             if ((leftIntersection % 2) == 1 && (rightIntersection % 2) == 1)
             {
                 return true;

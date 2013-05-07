@@ -177,9 +177,9 @@ namespace Mesh
             Vector3D r = this.End.ToVector3D() - p;
             Vector3D qmp = q - p;
 
-            Vector3D rxs = Vector3D.CrossProduct(r, s);
-            Vector3D qmpxr = Vector3D.CrossProduct(qmp, r);
-            Vector3D qmpxs = Vector3D.CrossProduct(qmp, s);
+            Vector3D rxs = new Vector3D(0, 0, s.X * r.Y - r.X * s.Y);//Vector3D.CrossProduct(r, s);
+            Vector3D qmpxr = new Vector3D(0, 0, r.X * qmp.Y - qmp.X * r.Y);//Vector3D.CrossProduct(qmp, r);
+            Vector3D qmpxs = new Vector3D(0, 0, s.X * qmp.Y - qmp.X * s.Y);//Vector3D.CrossProduct(qmp, s);
 
             if (/*rxs.Z == 0 && qmpxr.Z == 0.0*/ Math.Abs(rxs.Z) < Geometry.Epsilon
                 && Math.Abs(qmpxr.Z) < Geometry.Epsilon && qmp.Length > Geometry.Epsilon)
@@ -223,16 +223,16 @@ namespace Mesh
             HashSet<Triangle> triangles = new HashSet<Triangle>();
             foreach (Point p in mesh.Points.NeighbourAreaPoints(this.Start, cellDistance))
             {
-                foreach (var item in p.Triangles)
+                foreach (Triangle triangle in p.Triangles)
                 {
-                    triangles.Add(item);
+                    triangles.Add(triangle);
                 }
             }
             foreach (Point p in mesh.Points.NeighbourAreaPoints(this.End, cellDistance))
             {
-                foreach (var item in p.Triangles)
+                foreach (Triangle triangle in p.Triangles)
                 {
-                    triangles.Add(item);
+                    triangles.Add(triangle);
                 }
             }
             return triangles;
@@ -243,16 +243,16 @@ namespace Mesh
             HashSet<Segment> segments = new HashSet<Segment>();
             foreach (Point p in front.NeighbourAreaPoints(this.Start, cellDistance))
             {
-                foreach (var item in p.Segments)
+                foreach (Segment segment in p.Segments)
                 {
-                    segments.Add(item);
+                    segments.Add(segment);
                 }
             }
             foreach (Point p in front.NeighbourAreaPoints(this.End, cellDistance))
             {
-                foreach (var item in p.Segments)
+                foreach (Segment segment in p.Segments)
                 {
-                    segments.Add(item);
+                    segments.Add(segment);
                 }
             }
             return segments;

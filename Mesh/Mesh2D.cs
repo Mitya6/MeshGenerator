@@ -9,7 +9,6 @@ namespace Mesh
     public abstract class Mesh2D
     {
         public Quadtree Points { get; set; }
-        //public List<Point> Points { get; set; }
         public List<Triangle> Triangles { get; set; }
         public Front Front { get; set; }
         public Region OwnerRegion { get; set; }
@@ -18,7 +17,6 @@ namespace Mesh
         {
             this.Points = null;
             this.Triangles = new List<Triangle>();
-            //this.Fronts = new List<Front>();
             this.OwnerRegion = region;
         }
 

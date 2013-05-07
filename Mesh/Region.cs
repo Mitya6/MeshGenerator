@@ -24,9 +24,7 @@ namespace Mesh
         /// </summary>
         public Front DivideContours(out double idealDistance)
         {
-            //double d;
             Front front = new Front(this.Contours[0].Divide(out idealDistance));
-            //idealDistance = Double.MaxValue;
 
             for (int i = 1; i < this.Contours.Count; i++)
             {

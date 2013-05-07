@@ -16,17 +16,6 @@ namespace Mesh
 
         public Point Start { get; set; }
         public Point End { get; set; }
-        //private Point start;
-        //public Point Start
-        //{
-        //    get { return start; }
-        //}
-
-        //private Point end;
-        //public Point End
-        //{
-        //    get { return end; }
-        //}
 
         public LineBase(Point start, Point end)
         {

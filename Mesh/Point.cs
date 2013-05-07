@@ -61,21 +61,5 @@ namespace Mesh
             });
             points.Sort(compfunc);
         }
-
-        //private Point GetClosestPoint(Point p, List<Point> pts)
-        //{
-        //    Point closest = pts[0];
-        //    double minD = Point.Distance(p, pts[0]);
-        //    foreach (Point point in pts)
-        //    {
-        //        double d = Point.Distance(p, point);
-        //        if (d < minD)
-        //        {
-        //            minD = d;
-        //            closest = point;
-        //        }
-        //    }
-        //    return closest;
-        //}
     }
 }

@@ -28,12 +28,8 @@ namespace Mesh
         /// </summary>
         public override void BuildMesh()
         {
-            // Check whether the contours of the geometry are closed.
-
             // Check whether the points of the contours are in the same plane.
             CheckPlane();
-
-            // Check inner/outer contour numbers.
 
             // Divide contours into segments and create initial front.
             double distance;
@@ -43,12 +39,8 @@ namespace Mesh
             this.Front.Points.ConnectNeighbours();
             this.Front.InitFront();
 
-            // Calculate min ideal point distance from base segment.
-            //CalculateIdealDistance();
-
             // Initialize Quadtree to store mesh points.
-            this.Points = new Quadtree(/*this.Front.Points.Left, this.Front.Points.Top,
-                this.Front.Points.Right, this.Front.Points.Bottom*/this.Front.GetAllPoints());
+            this.Points = new Quadtree(this.Front.GetAllPoints());
             this.Points.BuildRecursive(this.idealDistance);
             this.Points.ConnectNeighbours();
 
@@ -110,14 +102,6 @@ namespace Mesh
                     continue;
                 }
 
-                ////////////////////////////***************
-                //if (this.Triangles.Count == 11289 && shortestSegment.Start.X <1.82
-                //    && shortestSegment.Start.X > 1.8)
-                //{
-                //    int i = 2;
-                //}
-                ////////////////////////////***************
-
                 shortestSegment.Checked = true;
 
                 // Find ideal point.
@@ -140,11 +124,9 @@ namespace Mesh
                         ResetCheckedFlag();
                         break;
                     }
-
                     nearbyPoints.RemoveAt(0);
                 }
             }
-
         }
 
         private void DecreaseFront()
@@ -176,9 +158,7 @@ namespace Mesh
                         }
                     }
 
-            // find 4 or longer cycle and reduce it
-            //      2a) nagy szögek -> közelebbi pontpár összeköt
-            //      2b) kis szögek -> pontösszevonás
+            // Find 4 or longer cycle and reduce it
             for (int i = 0; i < segments.Count; i++)
                 for (int j = i + 1; j < segments.Count; j++)
                 {
@@ -196,7 +176,7 @@ namespace Mesh
                     }
                 }
 
-            throw new ApplicationException("temp finish");
+            throw new ApplicationException("Early finish");
 
         }
 
@@ -380,48 +360,48 @@ namespace Mesh
             HashSet<Triangle> triangles = s.GetNearbyTriangles(this, cellDistance);
 
             // Check intersection with nearby triangles
-            //foreach (Triangle triangle in triangles)
-            //{
-            //    Point p1 = s.Intersection(new Segment(triangle.Points[0], triangle.Points[1]));
-            //    Point p2 = s.Intersection(new Segment(triangle.Points[1], triangle.Points[2]));
-            //    Point p3 = s.Intersection(new Segment(triangle.Points[2], triangle.Points[0]));
-            //    if (p1 != null || p2 != null || p3 != null)
-            //        return true;
-            //}
-            Parallel.ForEach(triangles, (triangle, state) =>
+            foreach (Triangle triangle in triangles)
             {
                 Point p1 = s.Intersection(new Segment(triangle.Points[0], triangle.Points[1]));
                 Point p2 = s.Intersection(new Segment(triangle.Points[1], triangle.Points[2]));
                 Point p3 = s.Intersection(new Segment(triangle.Points[2], triangle.Points[0]));
                 if (p1 != null || p2 != null || p3 != null)
-                {
-                    intersecting = true;
-                    state.Stop();
-                }
-            });
+                    return true;
+            }
+            //Parallel.ForEach(triangles, (triangle, state) =>
+            //{
+            //    Point p1 = s.Intersection(new Segment(triangle.Points[0], triangle.Points[1]));
+            //    Point p2 = s.Intersection(new Segment(triangle.Points[1], triangle.Points[2]));
+            //    Point p3 = s.Intersection(new Segment(triangle.Points[2], triangle.Points[0]));
+            //    if (p1 != null || p2 != null || p3 != null)
+            //    {
+            //        intersecting = true;
+            //        state.Stop();
+            //    }
+            //});
 
             // Get nearby segments of the front
             HashSet<Segment> segments = s.GetNearbySegments(this.Front, cellDistance);
             
             // Check intersecion with nearby segments
-            //foreach (Segment other in segments)
-            //{
-            //    Point p = s.Intersection(other);
-            //    if (p != null)
-            //        return true;
-            //}
-            Parallel.ForEach(segments, (other, state) =>
+            foreach (Segment other in segments)
             {
                 Point p = s.Intersection(other);
                 if (p != null)
-                {
-                    intersecting = true;
-                    state.Stop();
-                }
-            });
+                    return true;
+            }
+            //Parallel.ForEach(segments, (other, state) =>
+            //{
+            //    Point p = s.Intersection(other);
+            //    if (p != null)
+            //    {
+            //        intersecting = true;
+            //        state.Stop();
+            //    }
+            //});
 
-            //return false;
-            return intersecting;
+            return false;
+            //return intersecting;
         }
 
         /// <summary>
