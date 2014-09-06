@@ -104,8 +104,7 @@ namespace Mesh
         }
 
         private String FormatConnectivity(List<Point> points, List<Triangle> triangles)
-        {
-            // TODO: real formatting, now just test data
+        {            
             StringBuilder connData = new StringBuilder();
             
             foreach (Triangle triangle in triangles)
@@ -127,11 +126,6 @@ namespace Mesh
             {
                 pointData.Append(String.Format(System.Globalization.CultureInfo.InvariantCulture,
                     "{0:0.0000000} {1:0.0000000} {2:0.0000000} ", point.X, point.Y, point.Z));
-
-                // TODO: formatting
-                //pointData.Append(String.Format(System.Globalization.CultureInfo.InvariantCulture,
-                //    "{0:0.0000000} {1:0.0000000} {2:0.0000000}\n",
-                //    point.X, point.Y, point.Z));
             }
 
             return pointData.ToString();

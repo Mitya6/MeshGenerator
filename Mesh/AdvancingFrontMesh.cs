@@ -48,20 +48,6 @@ namespace Mesh
             ProcessFront();
         }
 
-        // temporary solution, needs to be rewrited
-        //private void CalculateIdealDistance()
-        //{
-        //    List<Segment> segments = this.Front.GetSegmentsUnordered();
-        //    foreach (Segment segment in segments)
-        //    {
-        //        if (segment.GetLength() < this.idealDistance)
-        //        {
-        //            this.idealDistance = segment.GetLength();
-        //        }
-        //    }
-        //}
-
-        // Refinement needed (3 points on the same straight).
         /// <summary>
         /// Checks that all input points in the owner region are in the same plane.
         /// </summary>
@@ -354,8 +340,6 @@ namespace Mesh
         /// </summary>
         private bool IsIntersecting(Segment s)
         {
-            bool intersecting = false;
-
             // Get nearby triangles
             HashSet<Triangle> triangles = s.GetNearbyTriangles(this, cellDistance);
 
@@ -368,17 +352,6 @@ namespace Mesh
                 if (p1 != null || p2 != null || p3 != null)
                     return true;
             }
-            //Parallel.ForEach(triangles, (triangle, state) =>
-            //{
-            //    Point p1 = s.Intersection(new Segment(triangle.Points[0], triangle.Points[1]));
-            //    Point p2 = s.Intersection(new Segment(triangle.Points[1], triangle.Points[2]));
-            //    Point p3 = s.Intersection(new Segment(triangle.Points[2], triangle.Points[0]));
-            //    if (p1 != null || p2 != null || p3 != null)
-            //    {
-            //        intersecting = true;
-            //        state.Stop();
-            //    }
-            //});
 
             // Get nearby segments of the front
             HashSet<Segment> segments = s.GetNearbySegments(this.Front, cellDistance);
@@ -390,18 +363,8 @@ namespace Mesh
                 if (p != null)
                     return true;
             }
-            //Parallel.ForEach(segments, (other, state) =>
-            //{
-            //    Point p = s.Intersection(other);
-            //    if (p != null)
-            //    {
-            //        intersecting = true;
-            //        state.Stop();
-            //    }
-            //});
 
             return false;
-            //return intersecting;
         }
 
         /// <summary>

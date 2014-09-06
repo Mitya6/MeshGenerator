@@ -113,8 +113,7 @@ namespace Mesh
         /// </summary>
         public bool Connected(Segment other)
         {
-            if (/*this.Start.Equals(other.Start) || */this.Start.Equals(other.End) ||
-                this.End.Equals(other.Start)/* || this.End.Equals(other.End)*/)
+            if (this.Start.Equals(other.End) || this.End.Equals(other.Start))
             {
                 return true;
             }
@@ -177,11 +176,11 @@ namespace Mesh
             Vector3D r = this.End.ToVector3D() - p;
             Vector3D qmp = q - p;
 
-            Vector3D rxs = new Vector3D(0, 0, s.X * r.Y - r.X * s.Y);//Vector3D.CrossProduct(r, s);
-            Vector3D qmpxr = new Vector3D(0, 0, r.X * qmp.Y - qmp.X * r.Y);//Vector3D.CrossProduct(qmp, r);
-            Vector3D qmpxs = new Vector3D(0, 0, s.X * qmp.Y - qmp.X * s.Y);//Vector3D.CrossProduct(qmp, s);
+            Vector3D rxs = new Vector3D(0, 0, s.X * r.Y - r.X * s.Y);
+            Vector3D qmpxr = new Vector3D(0, 0, r.X * qmp.Y - qmp.X * r.Y);
+            Vector3D qmpxs = new Vector3D(0, 0, s.X * qmp.Y - qmp.X * s.Y);
 
-            if (/*rxs.Z == 0 && qmpxr.Z == 0.0*/ Math.Abs(rxs.Z) < Geometry.Epsilon
+            if (Math.Abs(rxs.Z) < Geometry.Epsilon
                 && Math.Abs(qmpxr.Z) < Geometry.Epsilon && qmp.Length > Geometry.Epsilon)
             {
                 // Collinear

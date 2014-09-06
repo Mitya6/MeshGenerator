@@ -140,10 +140,6 @@ namespace Mesh
                     if (s.Equals(segment))
                     {
                         sToRemove = segment;
-                        //if (item.Value.Count == 0)
-                        //{
-                        //    Segments.Remove(item.Key);
-                        //}
                     }
                 }
                 if (sToRemove != null)
@@ -202,7 +198,7 @@ namespace Mesh
         /// </summary>
         public bool Contains(Segment s, int cellDistance)
         {
-            HashSet<Segment> segments = s.GetNearbySegments(this, cellDistance);//GetSegmentsUnordered();
+            HashSet<Segment> segments = s.GetNearbySegments(this, cellDistance);
             foreach (Segment segment in segments)
             {
                 if (segment.Equals(s))
@@ -234,24 +230,6 @@ namespace Mesh
             }
             return null;
         }
-
-        /// <summary>
-        /// Determines whether the front has at least one commmon 
-        /// point with another front.
-        /// </summary>
-        //public bool HasCommonPointWith(Front other)
-        //{
-        //    foreach (Point point in this.Points)
-        //    {
-        //        foreach (Point otherPoint in other.Points)
-        //        {
-        //            if (point.Equals(otherPoint))
-        //                return true;
-        //        }
-        //    }
-        //    return false;
-        //}
-
 
         public void Join(Front front)
         {
